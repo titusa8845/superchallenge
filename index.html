@@ -171,625 +171,603 @@
                         <polyline points="21 15 16 10 5 21" />
                     </svg>
                     ASSETS
-                </span>
+                    <div class="px-6 py-3 flex justify-between items-center border-b border-white/5 bg-white/5">
+                        <div class="flex items-center gap-6">
+                            <span
+                                class="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <polyline points="21 15 16 10 5 21" />
+                                </svg>
+                                ASSETS
+                            </span>
+                        </div>
 
-                <!-- 微調桿 (Sync Offset) -->
-                <div class="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                    <span class="text-[10px] text-zinc-500 font-bold">微調桿</span>
-                    <input type="range" id="offset-slider" min="-2000" max="2000" value="0" step="10"
-                        class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
-                    <span id="offset-value" class="text-[10px] text-zinc-300 font-mono w-10 text-right">0ms</span>
-                </div>
+                        <div class="flex gap-3">
+                            <div
+                                class="hidden md:flex text-[10px] text-zinc-500 font-mono items-center mr-2 border border-dashed border-zinc-700 px-2 rounded">
+                                DRAG & DROP READY
+                            </div>
+                            <button onclick="document.getElementById('upload-input').click()"
+                                class="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-4 py-1.5 rounded-lg text-blue-200 transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                上傳
+                            </button>
+                            <button onclick="clearTraySelection()"
+                                class="text-xs text-zinc-500 hover:text-white px-3 transition-colors">清除選取</button>
+                        </div>
+                        <input type="file" id="upload-input" multiple accept="image/*" class="hidden">
+                    </div>
 
-                <!-- BPM 微調 -->
-                <div class="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                    <span class="text-[10px] text-zinc-500 font-bold">BPM</span>
-                    <input type="range" id="bpm-slider" min="168" max="178" value="173" step="1"
-                        class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
-                    <span id="bpm-value" class="text-[10px] text-zinc-300 font-mono w-8 text-right">173</span>
-                </div>
+                    <div id="image-tray"
+                        class="h-32 w-full overflow-x-auto overflow-y-hidden p-4 flex gap-4 custom-scrollbar items-center bg-zinc-950/50 transition-colors">
+                        <div
+                            class="text-zinc-600 text-sm italic px-8 pointer-events-none select-none flex items-center gap-3 w-full justify-center opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            拖曳圖片至此處，或點擊上傳按鈕
+                        </div>
+                    </div>
             </div>
 
-            <div class="flex gap-3">
-                <div
-                    class="hidden md:flex text-[10px] text-zinc-500 font-mono items-center mr-2 border border-dashed border-zinc-700 px-2 rounded">
-                    DRAG & DROP READY
-                </div>
-                <button onclick="document.getElementById('upload-input').click()"
-                    class="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-4 py-1.5 rounded-lg text-blue-200 transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    上傳
-                </button>
-                <button onclick="clearTraySelection()"
-                    class="text-xs text-zinc-500 hover:text-white px-3 transition-colors">清除選取</button>
-            </div>
-            <input type="file" id="upload-input" multiple accept="image/*" class="hidden">
-        </div>
+            <!-- YouTube 隱藏播放器 -->
+            <div id="youtube-player" class="fixed opacity-0 pointer-events-none -z-50 w-1 h-1 bottom-0 left-0"></div>
 
-        <div id="image-tray"
-            class="h-32 w-full overflow-x-auto overflow-y-hidden p-4 flex gap-4 custom-scrollbar items-center bg-zinc-950/50 transition-colors">
-            <div
-                class="text-zinc-600 text-sm italic px-8 pointer-events-none select-none flex items-center gap-3 w-full justify-center opacity-50">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                拖曳圖片至此處，或點擊上傳按鈕
-            </div>
-        </div>
-    </div>
+            <style>
+                /* Custom Scrollbar */
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 8px;
+                }
 
-    <!-- YouTube 隱藏播放器 -->
-    <div id="youtube-player" class="fixed opacity-0 pointer-events-none -z-50 w-1 h-1 bottom-0 left-0"></div>
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.02);
+                }
 
-    <style>
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 8px;
-        }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 4px;
+                }
 
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-        }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
+                .grid-item.active {
+                    border: 4px solid #ef4444 !important;
+                    box-shadow: 0 0 40px #ef4444, inset 0 0 20px #ef4444;
+                    transform: scale(1.05);
+                    z-index: 20;
+                    filter: brightness(1.2) contrast(1.1);
+                }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+                /* 3D Flip Effect */
+                .perspective-1000 {
+                    perspective: 1000px;
+                }
 
-        .grid-item.active {
-            border: 4px solid #ef4444 !important;
-            box-shadow: 0 0 40px #ef4444, inset 0 0 20px #ef4444;
-            transform: scale(1.05);
-            z-index: 20;
-            filter: brightness(1.2) contrast(1.1);
-        }
+                .transform-style-3d {
+                    transform-style: preserve-3d;
+                }
 
-        /* 3D Flip Effect */
-        .perspective-1000 {
-            perspective: 1000px;
-        }
+                .backface-hidden {
+                    backface-visibility: hidden;
+                }
 
-        .transform-style-3d {
-            transform-style: preserve-3d;
-        }
+                .rotate-y-180 {
+                    transform: rotateY(180deg);
+                }
 
-        .backface-hidden {
-            backface-visibility: hidden;
-        }
+                .flip-card-inner {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    text-align: center;
+                    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+                    transform-style: preserve-3d;
+                }
 
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
+                .flip-card-front,
+                .flip-card-back {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
+                    border-radius: 1rem;
+                    /* rounded-2xl */
+                    overflow: hidden;
+                }
 
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
+                .flip-card-back {
+                    transform: rotateY(180deg);
+                }
 
-        .flip-card-front,
-        .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 1rem;
-            /* rounded-2xl */
-            overflow: hidden;
-        }
+                /* When 'flipped' class is present, rotate the inner container */
+                .grid-item.flipped .flip-card-inner {
+                    transform: rotateY(180deg);
+                }
 
-        .flip-card-back {
-            transform: rotateY(180deg);
-        }
+                .tray-drag-over {
+                    background-color: rgba(59, 130, 246, 0.1) !important;
+                    border: 2px dashed rgba(59, 130, 246, 0.5);
+                    box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);
+                }
 
-        /* When 'flipped' class is present, rotate the inner container */
-        .grid-item.flipped .flip-card-inner {
-            transform: rotateY(180deg);
-        }
+                /* Mode Styles managed via JS classes on container */
+                .mode-standby #game-grid {
+                    width: 75%;
+                    height: 55%;
+                    transform: perspective(1000px) rotateX(2deg);
+                    background: rgba(255, 255, 255, 0.02);
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border-radius: 24px;
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+                }
 
-        .tray-drag-over {
-            background-color: rgba(59, 130, 246, 0.1) !important;
-            border: 2px dashed rgba(59, 130, 246, 0.5);
-            box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);
-        }
+                .mode-playing #game-grid {
+                    width: 95%;
+                    height: 90%;
+                    transform: perspective(1000px) rotateX(0deg);
+                    background: transparent;
+                    border: none;
+                    box-shadow: none;
+                }
 
-        /* Mode Styles managed via JS classes on container */
-        .mode-standby #game-grid {
-            width: 75%;
-            height: 55%;
-            transform: perspective(1000px) rotateX(2deg);
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
+                .drawer-closed {
+                    transform: translateY(100%);
+                }
 
-        .mode-playing #game-grid {
-            width: 95%;
-            height: 90%;
-            transform: perspective(1000px) rotateX(0deg);
-            background: transparent;
-            border: none;
-            box-shadow: none;
-        }
+                .drawer-open {
+                    transform: translateY(0%);
+                }
 
-        .drawer-closed {
-            transform: translateY(100%);
-        }
+                .flip-icon {
+                    transform: rotate(180deg);
+                }
+            </style>
 
-        .drawer-open {
-            transform: translateY(0%);
-        }
+            <script>
+                // --- 核心設定 ---
+                let BPM = 173;
+                let BEAT_DURATION = 60 / BPM;
 
-        .flip-icon {
-            transform: rotate(180deg);
-        }
-    </style>
+                const TOTAL_ROUNDS = 5;
+                const SLOTS_PER_ROUND = 8;
 
-    <script>
-        // --- 核心設定 ---
-        let BPM = 173;
-        let BEAT_DURATION = 60 / BPM;
+                const GAME_STATE = {
+                    currentRound: 0,
+                    rounds: Array.from({ length: TOTAL_ROUNDS }, () => ({
+                        images: Array(SLOTS_PER_ROUND).fill(null)
+                    })),
+                    activeTrayImage: null,
+                    isPlaying: false,
+                    animationFrameId: null,
+                    lastBeat: -1,
+                    globalOffset: 0,
+                    isDrawerOpen: true
+                };
 
-        const TOTAL_ROUNDS = 5;
-        const SLOTS_PER_ROUND = 8;
+                const RHYTHM_TIMELINE = [
+                    { time: 0.0, action: 'stop', round: 0 },
+                    { time: 5.3, action: 'start', round: 0 },
+                    { time: 10.6, action: 'start', round: 1 },
+                    { time: 15.9, action: 'start', round: 2 },
+                    { time: 21.1, action: 'start', round: 3 },
+                    { time: 26.4, action: 'start', round: 4 },
+                    { time: 999.0, action: 'stop' }
+                ];
 
-        const GAME_STATE = {
-            currentRound: 0,
-            rounds: Array.from({ length: TOTAL_ROUNDS }, () => ({
-                images: Array(SLOTS_PER_ROUND).fill(null)
-            })),
-            activeTrayImage: null,
-            isPlaying: false,
-            animationFrameId: null,
-            lastBeat: -1,
-            globalOffset: 0,
-            isDrawerOpen: true
-        };
+                // --- DOM Elements ---
+                const gridEl = document.getElementById('game-grid');
+                const gameContainer = document.getElementById('game-container');
+                const trayEl = document.getElementById('image-tray');
+                const uploadInput = document.getElementById('upload-input');
+                const drawerEl = document.getElementById('bottom-drawer');
+                const drawerIcon = document.getElementById('drawer-icon');
 
-        const RHYTHM_TIMELINE = [
-            { time: 0.0, action: 'stop', round: 0 },
-            { time: 5.3, action: 'start', round: 0 },
-            { time: 10.6, action: 'start', round: 1 },
-            { time: 15.9, action: 'start', round: 2 },
-            { time: 21.1, action: 'start', round: 3 },
-            { time: 26.4, action: 'start', round: 4 },
-            { time: 999.0, action: 'stop' }
-        ];
+                function init() {
+                    renderGrid();
+                    setupTrayEvents();
+                    updateRoundButtons();
+                    setGameMode('standby'); // default
+                }
 
-        // --- DOM Elements ---
-        const gridEl = document.getElementById('game-grid');
-        const gameContainer = document.getElementById('game-container');
-        const trayEl = document.getElementById('image-tray');
-        const uploadInput = document.getElementById('upload-input');
-        const offsetSlider = document.getElementById('offset-slider');
-        const offsetValue = document.getElementById('offset-value');
-        const bpmSlider = document.getElementById('bpm-slider');
-        const bpmValue = document.getElementById('bpm-value');
-        const drawerEl = document.getElementById('bottom-drawer');
-        const drawerIcon = document.getElementById('drawer-icon');
+                // --- View Mode & Drawer Logic ---
+                function setGameMode(mode) {
+                    const header = document.getElementById('header-panel');
+                    const roundIndicators = document.getElementById('round-indicators');
+                    // const controls = document.getElementById('control-panel'); // Kept for reference
 
-        function init() {
-            renderGrid();
-            setupTrayEvents();
-            updateRoundButtons();
-            setGameMode('standby'); // default
+                    if (mode === 'playing') {
+                        gameContainer.classList.remove('mode-standby');
+                        gameContainer.classList.add('mode-playing');
+                        toggleDrawer(false); // Auto close drawer
 
-            offsetSlider.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value);
-                GAME_STATE.globalOffset = val;
-                offsetValue.innerText = (val > 0 ? '+' : '') + val + 'ms';
-            });
+                        // Visual tweaks for playing: HIDDEN
+                        header.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
+                        roundIndicators.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
 
-            bpmSlider.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value);
-                BPM = val;
-                BEAT_DURATION = 60 / BPM;
-                bpmValue.innerText = val;
-            });
-        }
+                    } else {
+                        gameContainer.classList.remove('mode-playing');
+                        gameContainer.classList.add('mode-standby');
+                        toggleDrawer(true); // Auto open drawer
 
-        // --- View Mode & Drawer Logic ---
-        function setGameMode(mode) {
-            const header = document.getElementById('header-panel');
-            const roundIndicators = document.getElementById('round-indicators');
-            // const controls = document.getElementById('control-panel'); // Kept for reference
+                        // Visual tweaks for standby: VISIBLE
+                        header.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
+                        roundIndicators.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
+                    }
+                }
 
-            if (mode === 'playing') {
-                gameContainer.classList.remove('mode-standby');
-                gameContainer.classList.add('mode-playing');
-                toggleDrawer(false); // Auto close drawer
+                function toggleDrawer(forceState = null) {
+                    const shouldOpen = forceState !== null ? forceState : !GAME_STATE.isDrawerOpen;
+                    GAME_STATE.isDrawerOpen = shouldOpen;
 
-                // Visual tweaks for playing: HIDDEN
-                header.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
-                roundIndicators.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
+                    if (shouldOpen) {
+                        drawerEl.classList.remove('drawer-closed');
+                        drawerIcon.classList.remove('flip-icon'); // arrow down
+                    } else {
+                        drawerEl.classList.add('drawer-closed');
+                        drawerIcon.classList.add('flip-icon'); // arrow up
+                    }
+                }
 
-            } else {
-                gameContainer.classList.remove('mode-playing');
-                gameContainer.classList.add('mode-standby');
-                toggleDrawer(true); // Auto open drawer
+                // --- UI Rendering ---
+                function renderGrid() {
+                    gridEl.innerHTML = '';
+                    const images = GAME_STATE.rounds[GAME_STATE.currentRound].images;
 
-                // Visual tweaks for standby: VISIBLE
-                header.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
-                roundIndicators.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
-            }
-        }
+                    images.forEach((imgSrc, index) => {
+                        const slot = document.createElement('div');
+                        slot.id = `slot-${index}`;
+                        // perspective container
+                        slot.className = `grid-item perspective-1000 w-full h-full relative group cursor-pointer`;
 
-        function toggleDrawer(forceState = null) {
-            const shouldOpen = forceState !== null ? forceState : !GAME_STATE.isDrawerOpen;
-            GAME_STATE.isDrawerOpen = shouldOpen;
+                        // Flip Inner
+                        const inner = document.createElement('div');
+                        inner.className = 'flip-card-inner w-full h-full shadow-inner rounded-2xl';
 
-            if (shouldOpen) {
-                drawerEl.classList.remove('drawer-closed');
-                drawerIcon.classList.remove('flip-icon'); // arrow down
-            } else {
-                drawerEl.classList.add('drawer-closed');
-                drawerIcon.classList.add('flip-icon'); // arrow up
-            }
-        }
+                        // --- FRONT FACE ---
+                        const front = document.createElement('div');
+                        front.className = 'flip-card-front bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
 
-        // --- UI Rendering ---
-        function renderGrid() {
-            gridEl.innerHTML = '';
-            const images = GAME_STATE.rounds[GAME_STATE.currentRound].images;
-
-            images.forEach((imgSrc, index) => {
-                const slot = document.createElement('div');
-                slot.id = `slot-${index}`;
-                // perspective container
-                slot.className = `grid-item perspective-1000 w-full h-full relative group cursor-pointer`;
-
-                // Flip Inner
-                const inner = document.createElement('div');
-                inner.className = 'flip-card-inner w-full h-full shadow-inner rounded-2xl';
-
-                // --- FRONT FACE ---
-                const front = document.createElement('div');
-                front.className = 'flip-card-front bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
-
-                if (imgSrc) {
-                    front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        if (imgSrc) {
+                            front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
-                } else {
-                    front.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                        } else {
+                            front.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                        }
+
+                        // --- BACK FACE ---
+                        const back = document.createElement('div');
+                        back.className = 'flip-card-back bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
+                        back.innerHTML = `<div class="w-full h-full bg-zinc-900 flex items-center justify-center"><span class="animate-pulse text-zinc-500">Loading...</span></div>`;
+
+                        inner.appendChild(front);
+                        inner.appendChild(back);
+                        slot.appendChild(inner);
+
+                        slot.onclick = () => handleSlotClick(index);
+                        gridEl.appendChild(slot);
+                    });
                 }
 
-                // --- BACK FACE ---
-                const back = document.createElement('div');
-                back.className = 'flip-card-back bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
-                back.innerHTML = `<div class="w-full h-full bg-zinc-900 flex items-center justify-center"><span class="animate-pulse text-zinc-500">Loading...</span></div>`;
+                // Helper to update the "Back" face with the content of a specific round
+                function prepareFlipContent(targetRoundIndex) {
+                    const nextImages = GAME_STATE.rounds[targetRoundIndex].images;
+                    const slots = document.querySelectorAll('.grid-item');
 
-                inner.appendChild(front);
-                inner.appendChild(back);
-                slot.appendChild(inner);
+                    slots.forEach((slot, index) => {
+                        const inner = slot.querySelector('.flip-card-inner');
+                        if (!inner) return;
 
-                slot.onclick = () => handleSlotClick(index);
-                gridEl.appendChild(slot);
-            });
-        }
+                        const isFlipped = slot.classList.contains('flipped');
+                        // Target the hidden face
+                        const targetFace = isFlipped ? inner.querySelector('.flip-card-front') : inner.querySelector('.flip-card-back');
 
-        // Helper to update the "Back" face with the content of a specific round
-        function prepareFlipContent(targetRoundIndex) {
-            const nextImages = GAME_STATE.rounds[targetRoundIndex].images;
-            const slots = document.querySelectorAll('.grid-item');
-
-            slots.forEach((slot, index) => {
-                const inner = slot.querySelector('.flip-card-inner');
-                if (!inner) return;
-
-                const isFlipped = slot.classList.contains('flipped');
-                // Target the hidden face
-                const targetFace = isFlipped ? inner.querySelector('.flip-card-front') : inner.querySelector('.flip-card-back');
-
-                const imgSrc = nextImages[index];
-                if (imgSrc) {
-                    targetFace.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">
+                        const imgSrc = nextImages[index];
+                        if (imgSrc) {
+                            targetFace.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">
                                             <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
-                } else {
-                    targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
-                }
-            });
-        }
-
-        // Execute the flip animation
-        function triggerFlip() {
-            const slots = document.querySelectorAll('.grid-item');
-            slots.forEach(slot => {
-                slot.classList.toggle('flipped');
-            });
-        }
-
-        function updateRoundButtons() {
-            for (let i = 0; i < TOTAL_ROUNDS; i++) {
-                const btn = document.getElementById(`round-btn-${i}`);
-                if (i === GAME_STATE.currentRound) {
-                    btn.className = 'round-btn w-10 h-10 rounded-xl bg-blue-600 text-white font-bold shadow-[0_0_20px_rgba(37,99,235,0.5)] scale-110 transition-all border border-blue-400 text-sm z-10';
-                } else {
-                    btn.className = 'round-btn w-10 h-10 rounded-xl bg-zinc-800/50 text-zinc-400 font-bold hover:bg-zinc-700/80 transition-all border border-white/5 text-sm hover:text-white';
-                }
-            }
-        }
-
-        function handleSlotClick(index) {
-            const currentImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
-
-            if (currentImg) {
-                // If existing image, clear it (toggle off)
-                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
-            } else if (GAME_STATE.activeTrayImage) {
-                // If empty and tray has selection, set image (toggle on)
-                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
-            }
-
-            // Re-render logic that preserves flip state
-            const slot = document.getElementById(`slot-${index}`);
-            const isFlipped = slot.classList.contains('flipped');
-
-            // We just need to update the visible face
-            const inner = slot.querySelector('.flip-card-inner');
-            const targetFace = isFlipped ? inner.querySelector('.flip-card-back') : inner.querySelector('.flip-card-front');
-            const newImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
-
-            if (newImg) {
-                targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
-            } else {
-                targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
-            }
-        }
-
-        function setRound(roundIndex) {
-            GAME_STATE.currentRound = roundIndex;
-            updateRoundButtons();
-
-            // Reset to Front view when manually changing rounds (to keep things simple)
-            renderGrid(); // renderGrid creates fresh DOM, defaulting to Front
-
-            updateRhythmEffect(-1);
-            GAME_STATE.hasFlippedForThisRound = false;
-        }
-
-        // --- Image Tray Logic ---
-        function setupTrayEvents() {
-            trayEl.addEventListener('dragover', (e) => { e.preventDefault(); trayEl.classList.add('tray-drag-over'); });
-            trayEl.addEventListener('dragleave', (e) => { e.preventDefault(); trayEl.classList.remove('tray-drag-over'); });
-            trayEl.addEventListener('drop', (e) => {
-                e.preventDefault();
-                trayEl.classList.remove('tray-drag-over');
-                handleFiles(e.dataTransfer.files);
-            });
-            uploadInput.addEventListener('change', (e) => { handleFiles(e.target.files); uploadInput.value = ''; });
-        }
-
-        function handleFiles(files) {
-            if (!files.length) return;
-            const hint = trayEl.querySelector('.italic');
-            if (hint) hint.remove();
-
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => addImageToTray(evt.target.result);
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        function addImageToTray(src) {
-            const div = document.createElement('div');
-            div.className = 'tray-item w-28 h-24 bg-zinc-800 rounded-xl shrink-0 cursor-pointer overflow-hidden relative border-2 border-transparent hover:border-zinc-500 transition-all group';
-            div.innerHTML = `<img src="${src}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">`;
-            div.onclick = () => {
-                const prev = trayEl.querySelector('.border-blue-500');
-                if (prev) {
-                    prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
-                    prev.classList.add('border-transparent');
-                }
-                if (GAME_STATE.activeTrayImage === src) {
-                    GAME_STATE.activeTrayImage = null;
-                } else {
-                    div.classList.remove('border-transparent');
-                    div.classList.add('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
-                    GAME_STATE.activeTrayImage = src;
-                }
-            };
-            trayEl.appendChild(div);
-        }
-
-        function clearTraySelection() {
-            const prev = trayEl.querySelector('.border-blue-500');
-            if (prev) {
-                prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
-                prev.classList.add('border-transparent');
-            }
-            GAME_STATE.activeTrayImage = null;
-        }
-
-        // --- YouTube API ---
-        let player;
-        window.onYouTubeIframeAPIReady = function () {
-            player = new YT.Player('youtube-player', {
-                height: '100%', width: '100%', videoId: 'JtY2bm5Y-UY',
-                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
-            });
-        };
-
-        function onPlayerReady() {
-            const playBtn = document.getElementById('play-btn');
-            document.getElementById('loading-spinner').classList.add('hidden');
-            playBtn.disabled = false;
-        }
-
-        function onPlayerStateChange(event) {
-            const playIcon = document.getElementById('play-icon');
-            const pauseIcon = document.getElementById('pause-icon');
-            const playBtn = document.getElementById('play-btn');
-
-            if (event.data === YT.PlayerState.PLAYING) {
-                GAME_STATE.isPlaying = true;
-                playIcon.classList.add('hidden');
-                pauseIcon.classList.remove('hidden');
-                playBtn.classList.add('border-red-500', 'bg-red-600/20', 'animate-pulse');
-                setGameMode('playing');
-                loop();
-            } else {
-                GAME_STATE.isPlaying = false;
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-                playBtn.classList.remove('border-red-500', 'bg-red-600/20', 'animate-pulse');
-
-                // If stopped or paused, go back to standby
-                if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.CUED) {
-                    setGameMode('standby');
+                        } else {
+                            targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                        }
+                    });
                 }
 
-                if (GAME_STATE.animationFrameId) cancelAnimationFrame(GAME_STATE.animationFrameId);
-            }
-        }
+                // Execute the flip animation
+                function triggerFlip() {
+                    const slots = document.querySelectorAll('.grid-item');
+                    slots.forEach(slot => {
+                        slot.classList.toggle('flipped');
+                    });
+                }
 
-        // --- Game Loop ---
-        function loop() {
-            if (!GAME_STATE.isPlaying) return;
-            if (player && player.getCurrentTime) {
-                let currentTime = player.getCurrentTime();
-                const adjustedTime = currentTime - (GAME_STATE.globalOffset / 1000);
-                updateGameLogic(adjustedTime < 0 ? 0 : adjustedTime);
-                // document.getElementById('timer-display').innerText = `TIME: ${currentTime.toFixed(2)}s`;
-            }
-            GAME_STATE.animationFrameId = requestAnimationFrame(loop);
-        }
+                function updateRoundButtons() {
+                    for (let i = 0; i < TOTAL_ROUNDS; i++) {
+                        const btn = document.getElementById(`round-btn-${i}`);
+                        if (i === GAME_STATE.currentRound) {
+                            btn.className = 'round-btn w-10 h-10 rounded-xl bg-blue-600 text-white font-bold shadow-[0_0_20px_rgba(37,99,235,0.5)] scale-110 transition-all border border-blue-400 text-sm z-10';
+                        } else {
+                            btn.className = 'round-btn w-10 h-10 rounded-xl bg-zinc-800/50 text-zinc-400 font-bold hover:bg-zinc-700/80 transition-all border border-white/5 text-sm hover:text-white';
+                        }
+                    }
+                }
 
-        function updateGameLogic(time) {
-            const title = document.getElementById('main-title');
+                function handleSlotClick(index) {
+                    const currentImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
 
-            // 找出目前生效的時間區段
-            const currentEvent = [...RHYTHM_TIMELINE].reverse().find(e => time >= e.time);
-
-            if (currentEvent) {
-                // 回合切換 (Time-based fallback)
-                // If we are significantly past the start time, ensure we are on the right round.
-                // But if we just flipped early, we don't want to revert or re-trigger.
-                // The Timeline 'round' property is authoritative.
-                // If we flipped early, GAME_STATE.currentRound IS already nextRoundIdx.
-                // So if currentEvent.round matches, good.
-                // The tricky part: R1 ends at 8.0s. We flip to R2.
-                // Current time is 8.5s. currentEvent is still R1 (timeline: 5.3s).
-                // So currentEvent.round is 0. GAME_STATE.currentRound is 1.
-                // If we execute: `if (currentEvent.round !== GAME_STATE.currentRound) setRound(currentEvent.round)`
-                // It will SET IT BACK to 0!
-                // FIX: We must Ignore Time-based round setting if we are in the "Early Flip" period.
-                // OR: We only set round if the Beat Index is low (start of round)?
-
-                if (currentEvent.action === 'start') {
-                    // 計算該回合啟動後的經過時間
-                    const elapsedTime = time - currentEvent.time;
-                    const beatIndex = Math.floor(elapsedTime / BEAT_DURATION);
-
-                    // Start of round sync (only if we are NOT in the finished state of PREVIOUS round, which is impossible if `currentEvent` changed)
-                    // Logic: If beatIndex is < 8, we MUST be on `currentEvent.round`.
-                    // If beatIndex >= 8, we MIGHT be on next round (Early Flip).
-
-                    if (beatIndex < 8 && GAME_STATE.currentRound !== currentEvent.round) {
-                        setRound(currentEvent.round);
+                    if (currentImg) {
+                        // If existing image, clear it (toggle off)
+                        GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
+                    } else if (GAME_STATE.activeTrayImage) {
+                        // If empty and tray has selection, set image (toggle on)
+                        GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
                     }
 
-                    // 邏輯: 每一輪只閃爍 8 次 (0~7)
-                    if (beatIndex < 8) {
-                        GAME_STATE.hasFlippedForThisRound = false;
+                    // Re-render logic that preserves flip state
+                    const slot = document.getElementById(`slot-${index}`);
+                    const isFlipped = slot.classList.contains('flipped');
 
-                        if (beatIndex !== GAME_STATE.lastBeat) {
-                            GAME_STATE.lastBeat = beatIndex;
-                            updateRhythmEffect(beatIndex);
+                    // We just need to update the visible face
+                    const inner = slot.querySelector('.flip-card-inner');
+                    const targetFace = isFlipped ? inner.querySelector('.flip-card-back') : inner.querySelector('.flip-card-front');
+                    const newImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
 
-                            // Pump Title
-                            if (beatIndex % 2 === 0) { // 強拍
-                                title.style.opacity = '1';
-                                title.style.transform = 'scale(1.1)';
-                            } else {
-                                title.style.opacity = '0.7';
-                                title.style.transform = 'scale(1)';
+                    if (newImg) {
+                        targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                    } else {
+                        targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                    }
+                }
+
+                function setRound(roundIndex) {
+                    GAME_STATE.currentRound = roundIndex;
+                    updateRoundButtons();
+
+                    // Reset to Front view when manually changing rounds (to keep things simple)
+                    renderGrid(); // renderGrid creates fresh DOM, defaulting to Front
+
+                    updateRhythmEffect(-1);
+                    GAME_STATE.hasFlippedForThisRound = false;
+                }
+
+                // --- Image Tray Logic ---
+                function setupTrayEvents() {
+                    trayEl.addEventListener('dragover', (e) => { e.preventDefault(); trayEl.classList.add('tray-drag-over'); });
+                    trayEl.addEventListener('dragleave', (e) => { e.preventDefault(); trayEl.classList.remove('tray-drag-over'); });
+                    trayEl.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        trayEl.classList.remove('tray-drag-over');
+                        handleFiles(e.dataTransfer.files);
+                    });
+                    uploadInput.addEventListener('change', (e) => { handleFiles(e.target.files); uploadInput.value = ''; });
+                }
+
+                function handleFiles(files) {
+                    if (!files.length) return;
+                    const hint = trayEl.querySelector('.italic');
+                    if (hint) hint.remove();
+
+                    Array.from(files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = (evt) => addImageToTray(evt.target.result);
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+
+                function addImageToTray(src) {
+                    const div = document.createElement('div');
+                    div.className = 'tray-item w-28 h-24 bg-zinc-800 rounded-xl shrink-0 cursor-pointer overflow-hidden relative border-2 border-transparent hover:border-zinc-500 transition-all group';
+                    div.innerHTML = `<img src="${src}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">`;
+                    div.onclick = () => {
+                        const prev = trayEl.querySelector('.border-blue-500');
+                        if (prev) {
+                            prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
+                            prev.classList.add('border-transparent');
+                        }
+                        if (GAME_STATE.activeTrayImage === src) {
+                            GAME_STATE.activeTrayImage = null;
+                        } else {
+                            div.classList.remove('border-transparent');
+                            div.classList.add('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
+                            GAME_STATE.activeTrayImage = src;
+                        }
+                    };
+                    trayEl.appendChild(div);
+                }
+
+                function clearTraySelection() {
+                    const prev = trayEl.querySelector('.border-blue-500');
+                    if (prev) {
+                        prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
+                        prev.classList.add('border-transparent');
+                    }
+                    GAME_STATE.activeTrayImage = null;
+                }
+
+                // --- YouTube API ---
+                let player;
+                window.onYouTubeIframeAPIReady = function () {
+                    player = new YT.Player('youtube-player', {
+                        height: '100%', width: '100%', videoId: 'JtY2bm5Y-UY',
+                        playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
+                        events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+                    });
+                };
+
+                function onPlayerReady() {
+                    const playBtn = document.getElementById('play-btn');
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    playBtn.disabled = false;
+                }
+
+                function onPlayerStateChange(event) {
+                    const playIcon = document.getElementById('play-icon');
+                    const pauseIcon = document.getElementById('pause-icon');
+                    const playBtn = document.getElementById('play-btn');
+
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        GAME_STATE.isPlaying = true;
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.remove('hidden');
+                        playBtn.classList.add('border-red-500', 'bg-red-600/20', 'animate-pulse');
+                        setGameMode('playing');
+                        loop();
+                    } else {
+                        GAME_STATE.isPlaying = false;
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                        playBtn.classList.remove('border-red-500', 'bg-red-600/20', 'animate-pulse');
+
+                        // If stopped or paused, go back to standby
+                        if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.CUED) {
+                            setGameMode('standby');
+                        }
+
+                        if (GAME_STATE.animationFrameId) cancelAnimationFrame(GAME_STATE.animationFrameId);
+                    }
+                }
+
+                // --- Game Loop ---
+                function loop() {
+                    if (!GAME_STATE.isPlaying) return;
+                    if (player && player.getCurrentTime) {
+                        let currentTime = player.getCurrentTime();
+                        const adjustedTime = currentTime - (GAME_STATE.globalOffset / 1000);
+                        updateGameLogic(adjustedTime < 0 ? 0 : adjustedTime);
+                        // document.getElementById('timer-display').innerText = `TIME: ${currentTime.toFixed(2)}s`;
+                    }
+                    GAME_STATE.animationFrameId = requestAnimationFrame(loop);
+                }
+
+                function updateGameLogic(time) {
+                    const title = document.getElementById('main-title');
+
+                    // 找出目前生效的時間區段
+                    const currentEvent = [...RHYTHM_TIMELINE].reverse().find(e => time >= e.time);
+
+                    if (currentEvent) {
+                        // 回合切換 (Time-based fallback)
+                        // If we are significantly past the start time, ensure we are on the right round.
+                        // But if we just flipped early, we don't want to revert or re-trigger.
+                        // The Timeline 'round' property is authoritative.
+                        // If we flipped early, GAME_STATE.currentRound IS already nextRoundIdx.
+                        // So if currentEvent.round matches, good.
+                        // The tricky part: R1 ends at 8.0s. We flip to R2.
+                        // Current time is 8.5s. currentEvent is still R1 (timeline: 5.3s).
+                        // So currentEvent.round is 0. GAME_STATE.currentRound is 1.
+                        // If we execute: `if (currentEvent.round !== GAME_STATE.currentRound) setRound(currentEvent.round)`
+                        // It will SET IT BACK to 0!
+                        // FIX: We must Ignore Time-based round setting if we are in the "Early Flip" period.
+                        // OR: We only set round if the Beat Index is low (start of round)?
+
+                        if (currentEvent.action === 'start') {
+                            // 計算該回合啟動後的經過時間
+                            const elapsedTime = time - currentEvent.time;
+                            const beatIndex = Math.floor(elapsedTime / BEAT_DURATION);
+
+                            // Start of round sync (only if we are NOT in the finished state of PREVIOUS round, which is impossible if `currentEvent` changed)
+                            // Logic: If beatIndex is < 8, we MUST be on `currentEvent.round`.
+                            // If beatIndex >= 8, we MIGHT be on next round (Early Flip).
+
+                            if (beatIndex < 8 && GAME_STATE.currentRound !== currentEvent.round) {
+                                setRound(currentEvent.round);
                             }
+
+                            // 邏輯: 每一輪只閃爍 8 次 (0~7)
+                            if (beatIndex < 8) {
+                                GAME_STATE.hasFlippedForThisRound = false;
+
+                                if (beatIndex !== GAME_STATE.lastBeat) {
+                                    GAME_STATE.lastBeat = beatIndex;
+                                    updateRhythmEffect(beatIndex);
+
+                                    // Pump Title
+                                    if (beatIndex % 2 === 0) { // 強拍
+                                        title.style.opacity = '1';
+                                        title.style.transform = 'scale(1.1)';
+                                    } else {
+                                        title.style.opacity = '0.7';
+                                        title.style.transform = 'scale(1)';
+                                    }
+                                }
+                            } else {
+                                // 超過8拍，停止閃爍
+                                if (GAME_STATE.lastBeat !== -1) {
+                                    updateRhythmEffect(-1);
+                                    GAME_STATE.lastBeat = -1;
+                                    title.style.opacity = '0.5';
+                                    title.style.transform = 'scale(1)';
+
+                                    // --- EARLY SWITCH TRIGGER ---
+                                    const nextRoundIdx = currentEvent.round + 1;
+                                    // Ensure next round exists AND we haven't flipped yet
+                                    // Note: currentEvent.round comes from timeline.
+                                    if (nextRoundIdx < TOTAL_ROUNDS && !GAME_STATE.hasFlippedForThisRound) {
+                                        prepareFlipContent(nextRoundIdx);
+                                        // Small delay before flipping
+                                        setTimeout(() => {
+                                            triggerFlip();
+                                            GAME_STATE.currentRound = nextRoundIdx;
+                                            updateRoundButtons();
+                                        }, 500);
+                                        GAME_STATE.hasFlippedForThisRound = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            updateRhythmEffect(-1);
                         }
                     } else {
-                        // 超過8拍，停止閃爍
-                        if (GAME_STATE.lastBeat !== -1) {
-                            updateRhythmEffect(-1);
-                            GAME_STATE.lastBeat = -1;
-                            title.style.opacity = '0.5';
-                            title.style.transform = 'scale(1)';
-
-                            // --- EARLY SWITCH TRIGGER ---
-                            const nextRoundIdx = currentEvent.round + 1;
-                            // Ensure next round exists AND we haven't flipped yet
-                            // Note: currentEvent.round comes from timeline.
-                            if (nextRoundIdx < TOTAL_ROUNDS && !GAME_STATE.hasFlippedForThisRound) {
-                                prepareFlipContent(nextRoundIdx);
-                                // Small delay before flipping
-                                setTimeout(() => {
-                                    triggerFlip();
-                                    GAME_STATE.currentRound = nextRoundIdx;
-                                    updateRoundButtons();
-                                }, 500);
-                                GAME_STATE.hasFlippedForThisRound = true;
-                            }
-                        }
+                        updateRhythmEffect(-1);
                     }
-                } else {
-                    updateRhythmEffect(-1);
                 }
-            } else {
-                updateRhythmEffect(-1);
-            }
-        }
 
-        function updateRhythmEffect(slotIndex) {
-            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('active'));
-            if (slotIndex !== -1) {
-                const targetSlot = document.getElementById(`slot-${slotIndex}`);
-                if (targetSlot) targetSlot.classList.add('active');
-            }
-        }
+                function updateRhythmEffect(slotIndex) {
+                    document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('active'));
+                    if (slotIndex !== -1) {
+                        const targetSlot = document.getElementById(`slot-${slotIndex}`);
+                        if (targetSlot) targetSlot.classList.add('active');
+                    }
+                }
 
-        document.getElementById('play-btn').addEventListener('click', () => {
-            if (GAME_STATE.isPlaying) player.pauseVideo();
-            else player.playVideo();
-        });
+                document.getElementById('play-btn').addEventListener('click', () => {
+                    if (GAME_STATE.isPlaying) player.pauseVideo();
+                    else player.playVideo();
+                });
 
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            if (player && player.seekTo) {
-                player.seekTo(0);
-                player.pauseVideo();
-                GAME_STATE.lastBeat = -1;
-                setRound(0);
-                updateRhythmEffect(-1);
-                // document.getElementById('timer-display').innerText = "TIME: 0.00s";
-            }
-        });
+                document.getElementById('reset-btn').addEventListener('click', () => {
+                    if (player && player.seekTo) {
+                        player.seekTo(0);
+                        player.pauseVideo();
+                        GAME_STATE.lastBeat = -1;
+                        setRound(0);
+                        updateRhythmEffect(-1);
+                        // document.getElementById('timer-display').innerText = "TIME: 0.00s";
+                    }
+                });
 
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        init();
-    </script>
+                init();
+            </script>
 </body>
 
 </html>
