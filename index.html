@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超級大挑戰 - Rhythm Sync System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Inter', "Microsoft JhengHei", sans-serif;
+            background-color: #09090b;
+            color: white;
+            user-select: none;
+        }
+
+        /* 遊戲格子樣式 */
+        .grid-item {
+            transition: all 0.1s ease-out;
+            border: 2px solid #27272a;
+        }
+
+        .grid-item.active {
+            border-color: transparent;
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.8);
+            transform: scale(1.1);
+            z-index: 20;
+            outline: 8px solid #dc2626;
+        }
+
+        /* 標題節奏動畫 */
+        .title-beat {
+            transform: scale(1.1);
+            color: #dc2626;
+            text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+        }
+
+        /* 圖片庫樣式 */
+        .tray-item {
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .tray-item:hover {
+            transform: translateY(-5px);
+            border-color: #52525b;
+        }
+
+        .tray-item.selected {
+            border-color: #3b82f6;
+            /* 藍色選中框 */
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* 捲軸美化 */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- 頂部資訊列 -->
+    <div
+        class="flex-none p-4 flex justify-between items-start bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 z-50">
+        <div>
+            <h1 id="main-title"
+                class="text-4xl md:text-6xl font-black italic tracking-tighter transition-all duration-100">
+                超級大挑戰
+            </h1>
+            <div class="flex gap-4 mt-2 text-xs font-mono text-zinc-500">
+                <span class="flex items-center gap-1">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> BPM 170
+                </span>
+                <span id="timer-display">TIME: 0.00s</span>
+            </div>
+        </div>
+
+        <!-- 回合指示器 -->
+        <div class="flex gap-2">
+            <button onclick="setRound(0)" id="round-btn-0"
+                class="round-btn px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-bold hover:bg-zinc-700 transition-colors border border-zinc-700">R1</button>
+            <button onclick="setRound(1)" id="round-btn-1"
+                class="round-btn px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-bold hover:bg-zinc-700 transition-colors border border-zinc-700">R2</button>
+            <button onclick="setRound(2)" id="round-btn-2"
+                class="round-btn px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-bold hover:bg-zinc-700 transition-colors border border-zinc-700">R3</button>
+            <button onclick="setRound(3)" id="round-btn-3"
+                class="round-btn px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-bold hover:bg-zinc-700 transition-colors border border-zinc-700">R4</button>
+            <button onclick="setRound(4)" id="round-btn-4"
+                class="round-btn px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 font-bold hover:bg-zinc-700 transition-colors border border-zinc-700">R5</button>
+        </div>
+    </div>
+
+    <!-- 主遊戲區 (置中) -->
+    <div class="flex-1 flex items-center justify-center relative p-4">
+        <!-- 狀態顯示 -->
+        <div
+            class="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 px-4 py-1 rounded-full border border-zinc-800/50 backdrop-blur">
+            <div id="status-light" class="w-2 h-2 rounded-full bg-zinc-700"></div>
+            <span id="status-text" class="text-xs font-bold text-zinc-500 tracking-widest uppercase">STANDBY</span>
+        </div>
+
+        <!-- 2x4 網格 -->
+        <div id="game-grid"
+            class="grid grid-cols-4 grid-rows-2 gap-3 md:gap-6 p-6 bg-zinc-900/50 rounded-[2rem] border border-zinc-800/50 shadow-2xl">
+            <!-- 格子由 JS 動態生成 -->
+        </div>
+
+        <!-- 播放控制按鈕 (懸浮) -->
+        <div class="absolute right-8 bottom-8 flex flex-col gap-4">
+            <button id="play-btn" disabled
+                class="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center shadow-lg border border-zinc-700 hover:scale-105 active:scale-95 transition-all text-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <svg id="pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                    viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" />
+                    <rect x="14" y="4" width="4" height="16" />
+                </svg>
+                <div id="loading-spinner"
+                    class="hidden absolute inset-0 rounded-full border-4 border-t-red-500 border-r-transparent border-b-zinc-800 border-l-transparent animate-spin">
+                </div>
+            </button>
+            <button id="reset-btn"
+                class="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center shadow border border-zinc-800 hover:bg-zinc-800 text-zinc-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部控制列 -->
+    <div class="h-48 bg-zinc-950 border-t border-zinc-800 flex flex-col shrink-0">
+        <div class="px-4 py-2 flex justify-between items-center border-b border-zinc-900">
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest">圖片素材庫</span>
+                <!-- 同步微調控制 -->
+                <div class="flex items-center gap-2 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
+                    <span class="text-[10px] text-zinc-500 font-mono uppercase">SYNC OFFSET:</span>
+                    <input type="range" id="offset-slider" min="-2000" max="2000" value="0" step="10"
+                        class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer">
+                    <span id="offset-value" class="text-[10px] text-zinc-400 font-mono w-12 text-right">0ms</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('upload-input').click()"
+                    class="text-xs bg-zinc-800 hover:bg-zinc-700 px-3 py-1 rounded text-zinc-300 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    上傳圖片
+                </button>
+                <button onclick="clearTraySelection()"
+                    class="text-xs text-zinc-600 hover:text-zinc-400 px-2">取消選取</button>
+            </div>
+            <input type="file" id="upload-input" multiple accept="image/*">
+        </div>
+
+        <div id="image-tray"
+            class="flex-1 overflow-x-auto overflow-y-hidden p-4 flex gap-4 custom-scrollbar items-center">
+            <div class="text-zinc-700 text-sm italic px-4 pointer-events-none select-none">
+                從右上角上傳圖片，點選圖片後再點擊上方格子進行配置...
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube 隱藏播放器 -->
+    <div id="youtube-player" class="fixed opacity-0 pointer-events-none -z-50 w-1 h-1 bottom-0 left-0"></div>
+
+    <script>
+        // --- 核心設定 ---
+        const BPM = 170;
+        const BEAT_DURATION = 60 / BPM;
+
+        // 5 Rounds, 8 Slots each
+        const TOTAL_ROUNDS = 5;
+        const SLOTS_PER_ROUND = 8;
+
+        // 狀態管理
+        const GAME_STATE = {
+            currentRound: 0,
+            rounds: Array.from({ length: TOTAL_ROUNDS }, () => ({
+                images: Array(SLOTS_PER_ROUND).fill(null)
+            })),
+            activeTrayImage: null,
+            isPlaying: false,
+            animationFrameId: null, // 改用 AnimationFrame
+            lastBeat: -1,
+            globalOffset: 0 // ms
+        };
+
+        const RHYTHM_TIMELINE = [
+            // --- 初始 (0-5s 暫停) ---
+            { time: 0.0, action: 'stop', round: 0 },
+
+            // --- Round 1 (5s ~ 10.5s) ---
+            { time: 5.0, action: 'start', round: 0 },
+
+            // --- Round 2 (10.5s ~ 16s) ---
+            { time: 10.5, action: 'start', round: 1 },
+
+            // --- Round 3 (16s ~ 21s) ---
+            { time: 16.0, action: 'start', round: 2 },
+
+            // --- Round 4 (21s ~ 26s) ---
+            { time: 21.0, action: 'start', round: 3 },
+
+            // --- Round 5 (26s ~) ---
+            { time: 26.0, action: 'start', round: 4 },
+
+            { time: 999.0, action: 'stop' }
+        ];
+
+        // --- DOM Elements ---
+        const gridEl = document.getElementById('game-grid');
+        const trayEl = document.getElementById('image-tray');
+        const uploadInput = document.getElementById('upload-input');
+        const offsetSlider = document.getElementById('offset-slider');
+        const offsetValue = document.getElementById('offset-value');
+
+        // --- 初始化 ---
+        function init() {
+            renderGrid();
+            setupTrayEvents();
+            updateRoundButtons();
+
+            // Offset Control
+            offsetSlider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                GAME_STATE.globalOffset = val;
+                offsetValue.innerText = (val > 0 ? '+' : '') + val + 'ms';
+            });
+        }
+
+        // --- UI Rendering (Grid & Rounds) ---
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            const images = GAME_STATE.rounds[GAME_STATE.currentRound].images;
+
+            images.forEach((imgSrc, index) => {
+                const slot = document.createElement('div');
+                slot.id = `slot-${index}`;
+                slot.className = `grid-item relative w-20 h-20 md:w-32 md:h-32 bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center cursor-pointer hover:bg-zinc-700 transition-colors border-2 border-zinc-700`;
+
+                if (imgSrc) {
+                    slot.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">`;
+                } else {
+                    slot.innerHTML = `<span class="text-zinc-600 font-black text-2xl opacity-20">#${index + 1}</span>`;
+                }
+
+                slot.onclick = () => handleSlotClick(index);
+                gridEl.appendChild(slot);
+            });
+        }
+
+        function updateRoundButtons() {
+            for (let i = 0; i < TOTAL_ROUNDS; i++) {
+                const btn = document.getElementById(`round-btn-${i}`);
+                if (i === GAME_STATE.currentRound) {
+                    btn.classList.remove('bg-zinc-800', 'text-zinc-400');
+                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-500');
+                } else {
+                    btn.classList.add('bg-zinc-800', 'text-zinc-400');
+                    btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500');
+                }
+            }
+        }
+
+        // --- Interaction Logic ---
+        function handleSlotClick(index) {
+            if (GAME_STATE.activeTrayImage) {
+                // 將選中的素材填入格子
+                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
+                renderGrid();
+
+                // 可選：填入後是否清除選取？目前設計為保留選取以便連續填入
+            } else {
+                // 如果沒有選中素材，則清空格子
+                if (GAME_STATE.rounds[GAME_STATE.currentRound].images[index]) {
+                    if (confirm("確定要清除這張圖片嗎？")) {
+                        GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
+                        renderGrid();
+                    }
+                }
+            }
+        }
+
+        function setRound(roundIndex) {
+            GAME_STATE.currentRound = roundIndex;
+            updateRoundButtons();
+            renderGrid();
+            // 切換回合時，清除節奏框顯示
+            updateRhythmEffect(-1);
+        }
+
+        // --- Image Tray Logic ---
+        function setupTrayEvents() {
+            uploadInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (!files.length) return;
+
+                // 移除"無圖片"提示
+                const hint = trayEl.querySelector('.italic');
+                if (hint) hint.remove();
+
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        addImageToTray(evt.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // Reset input
+                uploadInput.value = '';
+            });
+        }
+
+        function addImageToTray(src) {
+            const div = document.createElement('div');
+            div.className = 'tray-item w-24 h-24 bg-zinc-800 rounded-lg shrink-0 cursor-pointer overflow-hidden relative';
+            div.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
+
+            div.onclick = () => {
+                // Toggle selection
+                const prev = trayEl.querySelector('.selected');
+                if (prev) prev.classList.remove('selected');
+
+                if (GAME_STATE.activeTrayImage === src) {
+                    GAME_STATE.activeTrayImage = null; // Deselect
+                } else {
+                    div.classList.add('selected');
+                    GAME_STATE.activeTrayImage = src;
+                }
+            };
+
+            trayEl.appendChild(div);
+        }
+
+        function clearTraySelection() {
+            const prev = trayEl.querySelector('.selected');
+            if (prev) prev.classList.remove('selected');
+            GAME_STATE.activeTrayImage = null;
+        }
+
+        // --- Audio & Rhythm Engine ---
+        let player;
+
+        // YouTube API
+        window.onYouTubeIframeAPIReady = function () {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'JtY2bm5Y-UY',
+                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        };
+
+        function onPlayerReady() {
+            const playBtn = document.getElementById('play-btn');
+            document.getElementById('loading-spinner').classList.add('hidden');
+            playBtn.disabled = false;
+            playBtn.classList.add('text-white', 'hover:bg-zinc-700');
+            playBtn.classList.remove('text-zinc-500');
+        }
+
+        function onPlayerStateChange(event) {
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                GAME_STATE.isPlaying = true;
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                loop(); // Start Animation Loop
+            } else {
+                GAME_STATE.isPlaying = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                if (GAME_STATE.animationFrameId) cancelAnimationFrame(GAME_STATE.animationFrameId);
+            }
+        }
+
+        // --- High Precision Loop ---
+        function loop() {
+            if (!GAME_STATE.isPlaying) return;
+
+            if (player && player.getCurrentTime) {
+                // 1. 取得影片當前時間
+                let currentTime = player.getCurrentTime();
+
+                // 2. 應用手動偏移量 (ms -> sec)
+                // 如果感覺"慢了"(畫面延遲)，我們要把時間變大一點(讓它早點觸發) -> currentTime + offset?
+                // 如果感覺"Rhythm快了"，我們要把時間變小一點 -> currentTime - offset
+                // 這裡設計：Offset > 0, 代表讓畫面動作延後 (適合畫面太快)
+                // Offset < 0, 代表讓畫面動作提早 (適合畫面太慢/聲音太快)
+                // 修正邏輯： Beat 計算依據 AdjustedTime
+                // AdjustedTime = RawTime - (Offset / 1000)
+                const adjustedTime = currentTime - (GAME_STATE.globalOffset / 1000);
+
+                updateGameLogic(adjustedTime < 0 ? 0 : adjustedTime);
+
+                document.getElementById('timer-display').innerText = `TIME: ${currentTime.toFixed(2)}s`;
+            }
+
+            GAME_STATE.animationFrameId = requestAnimationFrame(loop);
+        }
+
+        function updateGameLogic(time) {
+            const statusLight = document.getElementById('status-light');
+            const statusText = document.getElementById('status-text');
+
+            const currentEvent = [...RHYTHM_TIMELINE].reverse().find(e => time >= e.time);
+
+            if (currentEvent) {
+                if (currentEvent.round !== undefined && currentEvent.round !== GAME_STATE.currentRound) {
+                    setRound(currentEvent.round);
+                }
+
+                if (currentEvent.action === 'start') {
+                    statusLight.classList.remove('bg-zinc-700');
+                    statusLight.classList.add('bg-red-500', 'animate-ping');
+                    statusText.innerText = "SYNC ACTIVE";
+                    statusText.classList.add('text-red-500');
+
+                    const currentBeat = Math.floor(time / BEAT_DURATION);
+                    if (currentBeat !== GAME_STATE.lastBeat) {
+                        GAME_STATE.lastBeat = currentBeat;
+                        updateRhythmEffect(currentBeat % 8);
+                    }
+                } else {
+                    resetStatus(statusLight, statusText);
+                    updateRhythmEffect(-1);
+                }
+            } else {
+                resetStatus(statusLight, statusText);
+                updateRhythmEffect(-1);
+            }
+        }
+
+        function resetStatus(light, text) {
+            light.classList.remove('bg-red-500', 'animate-ping');
+            light.classList.add('bg-zinc-700');
+            text.innerText = "STANDBY";
+            text.classList.remove('text-red-500');
+        }
+
+        function updateRhythmEffect(slotIndex) {
+            // 清除標題動畫
+            const title = document.getElementById('main-title');
+            title.classList.remove('title-beat');
+
+            // 清除格子樣式
+            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('active', 'opacity-50'));
+
+            if (slotIndex !== -1) {
+                const targetSlot = document.getElementById(`slot-${slotIndex}`);
+                if (targetSlot) {
+                    // 為了讓視覺更明顯，讓現在指到的框框亮起
+                    targetSlot.classList.add('active');
+                    // 其他稍微變暗，強調對比
+                    // document.querySelectorAll('.grid-item:not(.active)').forEach(el => el.classList.add('opacity-50'));
+                }
+
+                // 標題跟著重拍跳 (每2拍)
+                if (slotIndex % 2 === 0) {
+                    title.classList.add('title-beat');
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('play-btn').addEventListener('click', () => {
+            if (GAME_STATE.isPlaying) player.pauseVideo();
+            else player.playVideo();
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (player && player.seekTo) {
+                player.seekTo(0);
+                player.pauseVideo();
+                GAME_STATE.lastBeat = -1;
+                setRound(0); // Reset to round 1
+                updateRhythmEffect(-1);
+                document.getElementById('timer-display').innerText = "TIME: 0.00s";
+            }
+        });
+
+        // Load API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // Run Init
+        init();
+
+    </script>
+</body>
+
+</html>
