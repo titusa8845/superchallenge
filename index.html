@@ -228,40 +228,57 @@
                 </div>
             </div>
 
-            <div class="flex gap-3">
-                <div
-                    class="hidden md:flex text-[10px] text-zinc-500 font-mono items-center mr-2 border border-dashed border-zinc-700 px-2 rounded">
-                    DRAG & DROP READY
-                </div>
-                <button onclick="document.getElementById('upload-input').click()"
-                    class="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-4 py-1.5 rounded-lg text-blue-200 transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    上傳
-                </button>
-                <button onclick="clearTraySelection()"
-                    class="text-xs text-zinc-500 hover:text-white px-3 transition-colors">清除選取</button>
-            </div>
-            <input type="file" id="upload-input" multiple accept="image/*" class="hidden">
+            <!-- Randomize Button -->
+            <button onclick="randomizeAllRounds()" id="randomize-btn"
+                class="ml-3 p-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white border border-indigo-500/30 transition-all flex items-center justify-center hover:scale-105 active:scale-95 group relative"
+                title="隨機填滿所有回合">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="group-hover:rotate-180 transition-transform duration-500">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 8h.01"></path>
+                    <path d="M8 8h.01"></path>
+                    <path d="M8 16h.01"></path>
+                    <path d="M16 16h.01"></path>
+                    <path d="M12 12h.01"></path>
+                </svg>
+            </button>
         </div>
 
-        <div id="image-tray"
-            class="h-32 w-full overflow-x-auto overflow-y-hidden p-4 flex gap-4 custom-scrollbar items-center bg-zinc-950/50 transition-colors">
+        <div class="flex gap-3">
             <div
-                class="text-zinc-600 text-sm italic px-8 pointer-events-none select-none flex items-center gap-3 w-full justify-center opacity-50">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5">
+                class="hidden md:flex text-[10px] text-zinc-500 font-mono items-center mr-2 border border-dashed border-zinc-700 px-2 rounded">
+                DRAG & DROP READY
+            </div>
+            <button onclick="document.getElementById('upload-input').click()"
+                class="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-4 py-1.5 rounded-lg text-blue-200 transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                拖曳圖片至此處，或點擊上傳按鈕
-            </div>
+                上傳
+            </button>
+            <button onclick="clearTraySelection()"
+                class="text-xs text-zinc-500 hover:text-white px-3 transition-colors">清除選取</button>
         </div>
+        <input type="file" id="upload-input" multiple accept="image/*" class="hidden">
+    </div>
+
+    <div id="image-tray"
+        class="h-32 w-full overflow-x-auto overflow-y-hidden p-4 flex gap-4 custom-scrollbar items-center bg-zinc-950/50 transition-colors">
+        <div
+            class="text-zinc-600 text-sm italic px-8 pointer-events-none select-none flex items-center gap-3 w-full justify-center opacity-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            拖曳圖片至此處，或點擊上傳按鈕
+        </div>
+    </div>
     </div>
 
     <!-- Info Modal -->
@@ -280,6 +297,21 @@
             <div class="space-y-4 text-zinc-300 text-sm md:text-base leading-relaxed">
                 <p><strong class="text-blue-400">1. 上傳與準備：</strong> 將圖片拖曳至下方素材庫，或點擊上傳按鈕。</p>
                 <p><strong class="text-green-400">2. 填入格子：</strong> 點擊下方素材選取圖片，再點擊上方格子填入。</p>
+                <p><strong class="text-pink-400">3. 跟著節奏：</strong> 觀察灰色背景的移動，當它經過格子時，該格會亮起並翻轉。</p>
+
+                <hr class="border-white/10 my-4">
+
+                <h3 class="text-lg font-bold text-white mb-2">關於本遊戲</h3>
+                <ul class="list-disc pl-5 space-y-1 text-zinc-400 text-xs md:text-sm">
+                    <li><strong class="text-zinc-300">免責聲明：</strong>請和平遵守遊戲規則，並在適當地方進行。</li>
+                    <li><strong class="text-zinc-300">開源資訊：</strong>此網頁為 HTML 公開原始碼可參考。</li>
+                    <li><strong class="text-zinc-300">聲音來源：</strong>YouTube 影片 <a
+                            href="https://www.youtube.com/watch?v=JtY2bm5Y-UY" target="_blank"
+                            class="text-blue-400 hover:text-blue-300 underline">Wordonbeat</a>。</li>
+                    <li><strong class="text-zinc-300">隱私聲明：</strong>圖片僅暫存於您的瀏覽器 (LocalStorage)，不會上傳至任何雲端伺服器，亦無需登入即可使用。
+                    </li>
+                </ul>
+
                 <div class="p-4 bg-white/5 rounded-xl border border-white/5 mt-4">
                     <p class="font-bold text-white mb-1">🔥 挑戰：</p>
                     <p>按下播放，跟著節奏大聲唸出圖片名稱，看誰能跟上！快來跟你的朋友試試看！</p>
@@ -654,6 +686,7 @@
             if (spotlightToggle) {
                 spotlightToggle.addEventListener('change', (e) => {
                     toggleSpotlight(e.target.checked);
+                    saveGameData();
                 });
                 toggleSpotlight(spotlightToggle.checked);
             }
@@ -665,6 +698,7 @@
                     if (player && player.setPlaybackRate) {
                         player.setPlaybackRate(rate);
                     }
+                    saveGameData();
                 });
             }
 
@@ -707,6 +741,9 @@
                     }
                 });
             }
+
+            // Load Data
+            loadGameData();
         }
 
         function setTheme(theme) {
@@ -717,6 +754,7 @@
                 document.body.classList.add('theme-parchment');
             }
             // 'dark' is default (no class)
+            saveGameData();
         }
 
         function toggleSpotlight(enabled) {
@@ -786,7 +824,7 @@
                 front.className = 'flip-card-front bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
 
                 if (imgSrc) {
-                    front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
                 } else {
                     front.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
@@ -858,6 +896,7 @@
                 // If NO tray selection but image exists, clear it (toggle off)
                 GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
             }
+            saveGameData();
 
             // Re-render logic that preserves flip state
             const slot = document.getElementById(`slot-${index}`);
@@ -869,7 +908,7 @@
             const newImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
 
             if (newImg) {
-                targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                         <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
             } else {
                 targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
@@ -913,10 +952,38 @@
             });
         }
 
-        function addImageToTray(src) {
+        function addImageToTray(src, shouldSave = true) {
+            // Remove hint if present
+            const hint = trayEl.querySelector('.text-zinc-600');
+            if (hint) hint.remove();
+
             const div = document.createElement('div');
             div.className = 'tray-item w-28 h-24 bg-zinc-800 rounded-xl shrink-0 cursor-pointer overflow-hidden relative border-2 border-transparent hover:border-zinc-500 transition-all group';
-            div.innerHTML = `<img src="${src}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">`;
+
+            // Image
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'w-full h-full object-contain group-hover:scale-110 transition-transform';
+            div.appendChild(img);
+
+            // Delete Button (X)
+            const delBtn = document.createElement('button');
+            delBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-md z-20 hover:scale-110 active:scale-90';
+            delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+            delBtn.title = '刪除圖片';
+            delBtn.onclick = (e) => {
+                e.stopPropagation(); // Prevent selection
+                div.remove();
+
+                // If deleting active image, clear selection
+                if (GAME_STATE.activeTrayImage === src) {
+                    GAME_STATE.activeTrayImage = null;
+                }
+                saveGameData();
+            };
+            div.appendChild(delBtn);
+
+            // Selection Logic
             div.onclick = () => {
                 const prev = trayEl.querySelector('.border-blue-500');
                 if (prev) {
@@ -932,6 +999,37 @@
                 }
             };
             trayEl.appendChild(div);
+            if (shouldSave) saveGameData();
+        }
+
+        function randomizeAllRounds() {
+            const trayImages = [];
+            document.querySelectorAll('#image-tray .tray-item img').forEach(img => {
+                trayImages.push(img.src);
+            });
+
+            if (trayImages.length === 0) {
+                alert('素材庫是空的！請先上傳圖片。');
+                return;
+            }
+
+            // Fill all rounds
+            for (let r = 0; r < TOTAL_ROUNDS; r++) {
+                for (let s = 0; s < SLOTS_PER_ROUND; s++) {
+                    const randomImg = trayImages[Math.floor(Math.random() * trayImages.length)];
+                    GAME_STATE.rounds[r].images[s] = randomImg;
+                }
+            }
+
+            renderGrid();
+            saveGameData();
+
+            // Visual feedback
+            const btn = document.getElementById('randomize-btn');
+            if (btn) {
+                btn.classList.add('animate-spin');
+                setTimeout(() => btn.classList.remove('animate-spin'), 500);
+            }
         }
 
         function clearTraySelection() {
