@@ -92,12 +92,6 @@
             </h1>
             <div class="flex items-baseline gap-2">
                 <span class="text-sm font-bold text-zinc-400 italic tracking-widest">by 小萬</span>
-                <div class="flex gap-4 mt-1 text-[10px] font-mono text-zinc-500 ml-auto">
-                    <span class="flex items-center gap-1">
-                        <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> BPM 170
-                    </span>
-                    <span id="timer-display">TIME: 0.00s</span>
-                </div>
             </div>
         </div>
 
@@ -190,9 +184,9 @@
                 <!-- BPM 微調 -->
                 <div class="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
                     <span class="text-[10px] text-zinc-500 font-bold">BPM</span>
-                    <input type="range" id="bpm-slider" min="167" max="177" value="172" step="1"
+                    <input type="range" id="bpm-slider" min="168" max="178" value="173" step="1"
                         class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
-                    <span id="bpm-value" class="text-[10px] text-zinc-300 font-mono w-8 text-right">172</span>
+                    <span id="bpm-value" class="text-[10px] text-zinc-300 font-mono w-8 text-right">173</span>
                 </div>
             </div>
 
@@ -303,7 +297,7 @@
 
     <script>
         // --- 核心設定 ---
-        let BPM = 172;
+        let BPM = 173;
         let BEAT_DURATION = 60 / BPM;
 
         const TOTAL_ROUNDS = 5;
@@ -324,10 +318,10 @@
 
         const RHYTHM_TIMELINE = [
             { time: 0.0, action: 'stop', round: 0 },
-            { time: 5.5, action: 'start', round: 0 },
-            { time: 10.8, action: 'start', round: 1 },
+            { time: 5.3, action: 'start', round: 0 },
+            { time: 10.6, action: 'start', round: 1 },
             { time: 15.9, action: 'start', round: 2 },
-            { time: 21.2, action: 'start', round: 3 },
+            { time: 21.1, action: 'start', round: 3 },
             { time: 26.4, action: 'start', round: 4 },
             { time: 999.0, action: 'stop' }
         ];
@@ -561,7 +555,7 @@
                 let currentTime = player.getCurrentTime();
                 const adjustedTime = currentTime - (GAME_STATE.globalOffset / 1000);
                 updateGameLogic(adjustedTime < 0 ? 0 : adjustedTime);
-                document.getElementById('timer-display').innerText = `TIME: ${currentTime.toFixed(2)}s`;
+                // document.getElementById('timer-display').innerText = `TIME: ${currentTime.toFixed(2)}s`;
             }
             GAME_STATE.animationFrameId = requestAnimationFrame(loop);
         }
@@ -637,7 +631,7 @@
                 GAME_STATE.lastBeat = -1;
                 setRound(0);
                 updateRhythmEffect(-1);
-                document.getElementById('timer-display').innerText = "TIME: 0.00s";
+                // document.getElementById('timer-display').innerText = "TIME: 0.00s";
             }
         });
 
