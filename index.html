@@ -178,12 +178,21 @@
                     </svg>
                     ASSETS
                 </span>
-                <!-- 同步微調控制 -->
-                <div class="flex items-center gap-3 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                    <span class="text-[10px] text-zinc-500 font-mono uppercase">SYNC OFFSET</span>
+
+                <!-- 微調桿 (Sync Offset) -->
+                <div class="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                    <span class="text-[10px] text-zinc-500 font-bold">微調桿</span>
                     <input type="range" id="offset-slider" min="-2000" max="2000" value="0" step="10"
-                        class="w-32 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
-                    <span id="offset-value" class="text-[10px] text-zinc-300 font-mono w-12 text-right">0ms</span>
+                        class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
+                    <span id="offset-value" class="text-[10px] text-zinc-300 font-mono w-10 text-right">0ms</span>
+                </div>
+
+                <!-- BPM 微調 -->
+                <div class="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                    <span class="text-[10px] text-zinc-500 font-bold">BPM</span>
+                    <input type="range" id="bpm-slider" min="167" max="177" value="172" step="1"
+                        class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer hover:bg-zinc-600 transition-colors">
+                    <span id="bpm-value" class="text-[10px] text-zinc-300 font-mono w-8 text-right">172</span>
                 </div>
             </div>
 
@@ -245,24 +254,6 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        @keyframes pump {
-            0% {
-                transform: scale(1);
-            }
-
-            40% {
-                transform: scale(1.02);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .pump-effect {
-            animation: pump 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
         .grid-item.active {
             border: 4px solid #ef4444 !important;
             box-shadow: 0 0 40px #ef4444, inset 0 0 20px #ef4444;
@@ -312,8 +303,8 @@
 
     <script>
         // --- 核心設定 ---
-        const BPM = 170;
-        const BEAT_DURATION = 60 / BPM;
+        let BPM = 172;
+        let BEAT_DURATION = 60 / BPM;
 
         const TOTAL_ROUNDS = 5;
         const SLOTS_PER_ROUND = 8;
@@ -348,6 +339,8 @@
         const uploadInput = document.getElementById('upload-input');
         const offsetSlider = document.getElementById('offset-slider');
         const offsetValue = document.getElementById('offset-value');
+        const bpmSlider = document.getElementById('bpm-slider');
+        const bpmValue = document.getElementById('bpm-value');
         const drawerEl = document.getElementById('bottom-drawer');
         const drawerIcon = document.getElementById('drawer-icon');
 
@@ -361,6 +354,13 @@
                 const val = parseInt(e.target.value);
                 GAME_STATE.globalOffset = val;
                 offsetValue.innerText = (val > 0 ? '+' : '') + val + 'ms';
+            });
+
+            bpmSlider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                BPM = val;
+                BEAT_DURATION = 60 / BPM;
+                bpmValue.innerText = val;
             });
         }
 
@@ -435,16 +435,16 @@
         }
 
         function handleSlotClick(index) {
-            if (GAME_STATE.activeTrayImage) {
+            const currentImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
+
+            if (currentImg) {
+                // If existing image, clear it (toggle off)
+                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
+                renderGrid();
+            } else if (GAME_STATE.activeTrayImage) {
+                // If empty and tray has selection, set image (toggle on)
                 GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
                 renderGrid();
-            } else {
-                if (GAME_STATE.rounds[GAME_STATE.currentRound].images[index]) {
-                    if (confirm("確定要清除這張圖片嗎？")) {
-                        GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
-                        renderGrid();
-                    }
-                }
             }
         }
 
@@ -567,27 +567,46 @@
         }
 
         function updateGameLogic(time) {
+            const title = document.getElementById('main-title');
+
+            // 找出目前生效的時間區段
             const currentEvent = [...RHYTHM_TIMELINE].reverse().find(e => time >= e.time);
+
             if (currentEvent) {
+                // 回合切換
                 if (currentEvent.round !== undefined && currentEvent.round !== GAME_STATE.currentRound) {
                     setRound(currentEvent.round);
                 }
+
                 if (currentEvent.action === 'start') {
+                    // 計算該回合啟動後的經過時間
                     const elapsedTime = time - currentEvent.time;
+
+                    // 計算目前是第幾拍 (0-based)
                     const beatIndex = Math.floor(elapsedTime / BEAT_DURATION);
+
+                    // 邏輯: 每一輪只閃爍 8 次 (0~7)
                     if (beatIndex < 8) {
                         if (beatIndex !== GAME_STATE.lastBeat) {
                             GAME_STATE.lastBeat = beatIndex;
                             updateRhythmEffect(beatIndex);
-                            // Pump Effect
-                            gameContainer.classList.remove('pump-effect');
-                            void gameContainer.offsetWidth;
-                            gameContainer.classList.add('pump-effect');
+
+                            // Pump Title
+                            if (beatIndex % 2 === 0) { // 強拍
+                                title.style.opacity = '1';
+                                title.style.transform = 'scale(1.1)';
+                            } else {
+                                title.style.opacity = '0.7';
+                                title.style.transform = 'scale(1)';
+                            }
                         }
                     } else {
+                        // 超過8拍，停止閃爍
                         if (GAME_STATE.lastBeat !== -1) {
                             updateRhythmEffect(-1);
                             GAME_STATE.lastBeat = -1;
+                            title.style.opacity = '0.5';
+                            title.style.transform = 'scale(1)';
                         }
                     }
                 } else {
