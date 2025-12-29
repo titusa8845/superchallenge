@@ -103,7 +103,7 @@
     </div>
 
     <!-- 頂部資訊列 (浮動) -->
-    <div class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-50 pointer-events-none">
+    <div class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-[60] pointer-events-none">
         <div class="pointer-events-auto bg-black/30 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-xl transition-all duration-500"
             id="header-panel">
             <div class="flex items-center gap-3">
@@ -744,6 +744,67 @@
 
             // Load Data
             loadGameData();
+        }
+
+        // --- LocalStorage Functions ---
+        function saveGameData() {
+            try {
+                const trayImages = [];
+                document.querySelectorAll('#image-tray .tray-item img').forEach(img => {
+                    trayImages.push(img.src);
+                });
+
+                const data = {
+                    rounds: GAME_STATE.rounds,
+                    trayImages: trayImages,
+                    theme: document.body.classList.contains('theme-light') ? 'light' :
+                        document.body.classList.contains('theme-parchment') ? 'parchment' : 'dark',
+                    spotlight: spotlightToggle ? spotlightToggle.checked : true,
+                    speed: speedSelect ? speedSelect.value : '1.0'
+                };
+                localStorage.setItem('superChallengeData', JSON.stringify(data));
+            } catch (e) {
+                console.warn('Failed to save game data:', e);
+            }
+        }
+
+        function loadGameData() {
+            try {
+                const savedData = localStorage.getItem('superChallengeData');
+                if (!savedData) return;
+
+                const data = JSON.parse(savedData);
+
+                // Restore rounds
+                if (data.rounds) {
+                    GAME_STATE.rounds = data.rounds;
+                    renderGrid();
+                }
+
+                // Restore tray images
+                if (data.trayImages && data.trayImages.length > 0) {
+                    data.trayImages.forEach(src => addImageToTray(src, false));
+                }
+
+                // Restore theme
+                if (data.theme && themeSelect) {
+                    themeSelect.value = data.theme;
+                    setTheme(data.theme);
+                }
+
+                // Restore spotlight
+                if (typeof data.spotlight === 'boolean' && spotlightToggle) {
+                    spotlightToggle.checked = data.spotlight;
+                    toggleSpotlight(data.spotlight);
+                }
+
+                // Restore speed
+                if (data.speed && speedSelect) {
+                    speedSelect.value = data.speed;
+                }
+            } catch (e) {
+                console.warn('Failed to load game data:', e);
+            }
         }
 
         function setTheme(theme) {
