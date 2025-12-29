@@ -96,8 +96,8 @@
         </div>
 
         <!-- 回合指示器 -->
-        <div
-            class="pointer-events-auto flex gap-1 bg-black/30 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-lg">
+        <div id="round-indicators"
+            class="pointer-events-auto flex gap-1 bg-black/30 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-lg transition-all duration-500">
             <button onclick="setRound(0)" id="round-btn-0"
                 class="round-btn w-10 h-10 rounded-xl bg-zinc-800/50 text-zinc-400 font-bold hover:bg-zinc-700/80 transition-all border border-white/5 text-sm">1</button>
             <button onclick="setRound(1)" id="round-btn-1"
@@ -256,6 +256,53 @@
             filter: brightness(1.2) contrast(1.1);
         }
 
+        /* 3D Flip Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            /* rounded-2xl */
+            overflow: hidden;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* When 'flipped' class is present, rotate the inner container */
+        .grid-item.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
         .tray-drag-over {
             background-color: rgba(59, 130, 246, 0.1) !important;
             border: 2px dashed rgba(59, 130, 246, 0.5);
@@ -361,24 +408,26 @@
         // --- View Mode & Drawer Logic ---
         function setGameMode(mode) {
             const header = document.getElementById('header-panel');
-            const controls = document.getElementById('control-panel');
+            const roundIndicators = document.getElementById('round-indicators');
+            // const controls = document.getElementById('control-panel'); // Kept for reference
 
             if (mode === 'playing') {
                 gameContainer.classList.remove('mode-standby');
                 gameContainer.classList.add('mode-playing');
                 toggleDrawer(false); // Auto close drawer
 
-                // Visual tweaks for playing
-                header.classList.add('opacity-30', 'scale-90', 'origin-top-left');
-                // controls.classList.add('opacity-50', 'hover:opacity-100');
+                // Visual tweaks for playing: HIDDEN
+                header.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
+                roundIndicators.classList.add('opacity-0', 'pointer-events-none', '-translate-y-10');
+
             } else {
                 gameContainer.classList.remove('mode-playing');
                 gameContainer.classList.add('mode-standby');
                 toggleDrawer(true); // Auto open drawer
 
-                // Visual tweaks for standby
-                header.classList.remove('opacity-30', 'scale-90', 'origin-top-left');
-                // controls.classList.remove('opacity-50');
+                // Visual tweaks for standby: VISIBLE
+                header.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
+                roundIndicators.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-10');
             }
         }
 
@@ -403,17 +452,66 @@
             images.forEach((imgSrc, index) => {
                 const slot = document.createElement('div');
                 slot.id = `slot-${index}`;
-                slot.className = `grid-item relative w-full h-full bg-zinc-800/80 rounded-2xl overflow-hidden flex items-center justify-center cursor-pointer hover:bg-zinc-700/80 transition-all border-2 border-white/5 group shadow-inner`;
+                // perspective container
+                slot.className = `grid-item perspective-1000 w-full h-full relative group cursor-pointer`;
+
+                // Flip Inner
+                const inner = document.createElement('div');
+                inner.className = 'flip-card-inner w-full h-full shadow-inner rounded-2xl';
+
+                // --- FRONT FACE ---
+                const front = document.createElement('div');
+                front.className = 'flip-card-front bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
 
                 if (imgSrc) {
-                    slot.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                      <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                    front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                       <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
                 } else {
-                    slot.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                    front.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
                 }
+
+                // --- BACK FACE ---
+                const back = document.createElement('div');
+                back.className = 'flip-card-back bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
+                back.innerHTML = `<div class="w-full h-full bg-zinc-900 flex items-center justify-center"><span class="animate-pulse text-zinc-500">Loading...</span></div>`;
+
+                inner.appendChild(front);
+                inner.appendChild(back);
+                slot.appendChild(inner);
 
                 slot.onclick = () => handleSlotClick(index);
                 gridEl.appendChild(slot);
+            });
+        }
+
+        // Helper to update the "Back" face with the content of a specific round
+        function prepareFlipContent(targetRoundIndex) {
+            const nextImages = GAME_STATE.rounds[targetRoundIndex].images;
+            const slots = document.querySelectorAll('.grid-item');
+
+            slots.forEach((slot, index) => {
+                const inner = slot.querySelector('.flip-card-inner');
+                if (!inner) return;
+
+                const isFlipped = slot.classList.contains('flipped');
+                // Target the hidden face
+                const targetFace = isFlipped ? inner.querySelector('.flip-card-front') : inner.querySelector('.flip-card-back');
+
+                const imgSrc = nextImages[index];
+                if (imgSrc) {
+                    targetFace.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">
+                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                } else {
+                    targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
+                }
+            });
+        }
+
+        // Execute the flip animation
+        function triggerFlip() {
+            const slots = document.querySelectorAll('.grid-item');
+            slots.forEach(slot => {
+                slot.classList.toggle('flipped');
             });
         }
 
@@ -434,19 +532,37 @@
             if (currentImg) {
                 // If existing image, clear it (toggle off)
                 GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
-                renderGrid();
             } else if (GAME_STATE.activeTrayImage) {
                 // If empty and tray has selection, set image (toggle on)
                 GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
-                renderGrid();
+            }
+
+            // Re-render logic that preserves flip state
+            const slot = document.getElementById(`slot-${index}`);
+            const isFlipped = slot.classList.contains('flipped');
+
+            // We just need to update the visible face
+            const inner = slot.querySelector('.flip-card-inner');
+            const targetFace = isFlipped ? inner.querySelector('.flip-card-back') : inner.querySelector('.flip-card-front');
+            const newImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
+
+            if (newImg) {
+                targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+            } else {
+                targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
             }
         }
 
         function setRound(roundIndex) {
             GAME_STATE.currentRound = roundIndex;
             updateRoundButtons();
-            renderGrid();
+
+            // Reset to Front view when manually changing rounds (to keep things simple)
+            renderGrid(); // renderGrid creates fresh DOM, defaulting to Front
+
             updateRhythmEffect(-1);
+            GAME_STATE.hasFlippedForThisRound = false;
         }
 
         // --- Image Tray Logic ---
@@ -567,20 +683,37 @@
             const currentEvent = [...RHYTHM_TIMELINE].reverse().find(e => time >= e.time);
 
             if (currentEvent) {
-                // 回合切換
-                if (currentEvent.round !== undefined && currentEvent.round !== GAME_STATE.currentRound) {
-                    setRound(currentEvent.round);
-                }
+                // 回合切換 (Time-based fallback)
+                // If we are significantly past the start time, ensure we are on the right round.
+                // But if we just flipped early, we don't want to revert or re-trigger.
+                // The Timeline 'round' property is authoritative.
+                // If we flipped early, GAME_STATE.currentRound IS already nextRoundIdx.
+                // So if currentEvent.round matches, good.
+                // The tricky part: R1 ends at 8.0s. We flip to R2.
+                // Current time is 8.5s. currentEvent is still R1 (timeline: 5.3s).
+                // So currentEvent.round is 0. GAME_STATE.currentRound is 1.
+                // If we execute: `if (currentEvent.round !== GAME_STATE.currentRound) setRound(currentEvent.round)`
+                // It will SET IT BACK to 0!
+                // FIX: We must Ignore Time-based round setting if we are in the "Early Flip" period.
+                // OR: We only set round if the Beat Index is low (start of round)?
 
                 if (currentEvent.action === 'start') {
                     // 計算該回合啟動後的經過時間
                     const elapsedTime = time - currentEvent.time;
-
-                    // 計算目前是第幾拍 (0-based)
                     const beatIndex = Math.floor(elapsedTime / BEAT_DURATION);
+
+                    // Start of round sync (only if we are NOT in the finished state of PREVIOUS round, which is impossible if `currentEvent` changed)
+                    // Logic: If beatIndex is < 8, we MUST be on `currentEvent.round`.
+                    // If beatIndex >= 8, we MIGHT be on next round (Early Flip).
+
+                    if (beatIndex < 8 && GAME_STATE.currentRound !== currentEvent.round) {
+                        setRound(currentEvent.round);
+                    }
 
                     // 邏輯: 每一輪只閃爍 8 次 (0~7)
                     if (beatIndex < 8) {
+                        GAME_STATE.hasFlippedForThisRound = false;
+
                         if (beatIndex !== GAME_STATE.lastBeat) {
                             GAME_STATE.lastBeat = beatIndex;
                             updateRhythmEffect(beatIndex);
@@ -601,6 +734,21 @@
                             GAME_STATE.lastBeat = -1;
                             title.style.opacity = '0.5';
                             title.style.transform = 'scale(1)';
+
+                            // --- EARLY SWITCH TRIGGER ---
+                            const nextRoundIdx = currentEvent.round + 1;
+                            // Ensure next round exists AND we haven't flipped yet
+                            // Note: currentEvent.round comes from timeline.
+                            if (nextRoundIdx < TOTAL_ROUNDS && !GAME_STATE.hasFlippedForThisRound) {
+                                prepareFlipContent(nextRoundIdx);
+                                // Small delay before flipping
+                                setTimeout(() => {
+                                    triggerFlip();
+                                    GAME_STATE.currentRound = nextRoundIdx;
+                                    updateRoundButtons();
+                                }, 500);
+                                GAME_STATE.hasFlippedForThisRound = true;
+                            }
                         }
                     }
                 } else {
