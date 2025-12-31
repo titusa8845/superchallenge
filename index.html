@@ -865,7 +865,10 @@
                             // 暫時設定輸入框的值，然後呼叫 addTextToTray
                             document.getElementById('text-input').value = item.value;
                             document.getElementById('text-size').value = item.size || 24;
-                            document.getElementById('text-color').value = item.color || '#ffffff';
+                            // 確保色彩格式為 HEX
+                            let color = item.color || '#ffffff';
+                            color = rgbToHex(color);
+                            document.getElementById('text-color').value = color;
                             addTextToTray();
                         }
                     });
@@ -1118,6 +1121,42 @@
                     if (e.key === 'Enter') addTextToTray();
                 });
             }
+
+            // 色彩和大小實時預覽
+            const colorInput = document.getElementById('text-color');
+            const sizeInput = document.getElementById('text-size');
+            if (colorInput) {
+                colorInput.addEventListener('change', updatePreview);
+                colorInput.addEventListener('input', updatePreview);
+            }
+            if (sizeInput) {
+                sizeInput.addEventListener('change', updatePreview);
+                sizeInput.addEventListener('input', updatePreview);
+            }
+        }
+
+        function updatePreview() {
+            const textInput = document.getElementById('text-input');
+            const sizeInput = document.getElementById('text-size');
+            const colorInput = document.getElementById('text-color');
+
+            const text = textInput.value.trim();
+            const size = parseInt(sizeInput.value) || 24;
+            const color = colorInput.value;
+
+            // 更新輸入框的背景色以示意色彩選擇
+            colorInput.style.backgroundColor = color;
+        }
+
+        // RGB 轉 HEX
+        function rgbToHex(rgb) {
+            if (rgb.startsWith('#')) return rgb;
+            const result = rgb.match(/\d+/g);
+            if (!result || result.length < 3) return '#ffffff';
+            return "#" + result.slice(0, 3).map(x => {
+                const hex = parseInt(x).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join('');
         }
 
         function handleFiles(files) {
