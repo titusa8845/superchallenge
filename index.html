@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" data-lang="zh">
 
 <head>
     <meta charset="UTF-8">
@@ -88,7 +88,7 @@
             <div class="w-full h-full bg-blue-500 animate-[loading-bar_1.5s_ease-in-out_infinite]"></div>
         </div>
         <div class="flex justify-center mt-2">
-            <span
+            <span id="youtube-loader-text"
                 class="bg-black/80 text-blue-200 text-xs font-bold px-4 py-1.5 rounded-full border border-blue-500/30 shadow-lg tracking-widest flex items-center gap-2">
                 <svg class="animate-spin h-3 w-3 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24">
@@ -115,6 +115,11 @@
                     class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors pointer-events-auto group relative"
                     title="玩法說明">
                     <span class="font-serif font-black italic text-lg opacity-70 group-hover:opacity-100">i</span>
+                </button>
+                <button id="lang-toggle"
+                    class="ml-4 px-3 py-1.5 rounded-lg bg-white/10 text-white/80 hover:text-white text-xs font-bold border border-white/20 hover:bg-white/20 transition-all"
+                    title="Toggle Language">
+                    <span id="lang-text">中文</span>
                 </button>
             </div>
             <div class="flex items-baseline gap-2">
@@ -682,6 +687,193 @@
     </style>
 
     <script>
+        // === 翻譯系統 ===
+        const TRANSLATIONS = {
+            zh: {
+                title: '超級大挑戰',
+                info: '玩法說明',
+                langText: '中文',
+                textLabel: '文字:',
+                textPlaceholder: '輸入文字...',
+                sizeLabel: '大小:',
+                colorLabel: '色彩:',
+                addBtn: '加入',
+                spotlight: '聚光燈',
+                speed: '速度',
+                theme: '主題',
+                randomize: '隨機骰子',
+                clearGrid: '清除格子',
+                upload: '上傳',
+                clearSelection: '清除選取',
+                dragDropText: '拖曳圖片至此處，或點擊上傳按鈕',
+                howToPlay: '玩法說明',
+                upload2: '將圖片拖曳至下方素材庫，或點擊上傳按鈕。',
+                fillSlots: '點擊下方素材選取圖片，再點擊上方格子填入。',
+                followRhythm: '觀察灰色背景的移動，當它經過格子時，該格會亮起並翻轉。',
+                about: '關於本遊戲',
+                disclaimer: '請和平遵守遊戲規則，並在適當地方進行。',
+                opensource: '此網頁為 HTML 公開原始碼可參考。',
+                soundSource: 'YouTube 影片',
+                privacy: '圖片僅暫存於您的瀏覽器 (LocalStorage)，不會上傳至任何雲端伺服器，亦無需登入即可使用。',
+                challenge: '挑戰：',
+                challengeText: '按下播放，跟著節奏大聲唸出圖片名稱，看誰能跟上！快來跟你的朋友試試看！',
+                deleteImage: '刪除圖片',
+                deleteText: '刪除文字',
+                emptyTray: '素材庫是空的！請先上傳圖片或輸入文字。',
+                emptyText: '請輸入文字！',
+                darkTheme: '深色',
+                lightTheme: '淺色',
+                parchmentTheme: '羊皮紙',
+                youtubeLoading: 'YOUTUBE影片Wordonbeat載入中',
+                dragDropReady: 'DRAG & DROP READY'
+            },
+            en: {
+                title: 'Super Challenge',
+                info: 'How to Play',
+                langText: 'English',
+                textLabel: 'Text:',
+                textPlaceholder: 'Enter text...',
+                sizeLabel: 'Size:',
+                colorLabel: 'Color:',
+                addBtn: 'Add',
+                spotlight: 'Spotlight',
+                speed: 'Speed',
+                theme: 'Theme',
+                randomize: 'Randomize',
+                clearGrid: 'Clear Grid',
+                upload: 'Upload',
+                clearSelection: 'Clear Selection',
+                dragDropText: 'Drag images here, or click upload button',
+                howToPlay: 'How to Play',
+                upload2: 'Drag and drop images to the material library below, or click the upload button.',
+                fillSlots: 'Click on the materials below to select an image, then click on the grid slots above to fill them.',
+                followRhythm: 'Watch the gray background move. When it passes a grid slot, that slot will light up and flip.',
+                about: 'About This Game',
+                disclaimer: 'Please play fairly and follow the rules in appropriate settings.',
+                opensource: 'This webpage is open source HTML that you can refer to.',
+                soundSource: 'YouTube Video',
+                privacy: 'Images are stored only in your browser (LocalStorage) and will not be uploaded to any cloud server. No login required.',
+                challenge: 'Challenge:',
+                challengeText: 'Press play and say the image names out loud following the rhythm. See who can keep up! Try it with your friends!',
+                deleteImage: 'Delete Image',
+                deleteText: 'Delete Text',
+                emptyTray: 'Material library is empty! Please upload images or enter text first.',
+                emptyText: 'Please enter text!',
+                darkTheme: 'Dark',
+                lightTheme: 'Light',
+                parchmentTheme: 'Parchment',
+                youtubeLoading: 'YouTube Video Wordonbeat Loading',
+                dragDropReady: 'DRAG & DROP READY'
+            }
+        };
+
+        let CURRENT_LANG = localStorage.getItem('gameLanguage') || 'zh';
+
+        function t(key) {
+            return TRANSLATIONS[CURRENT_LANG][key] || TRANSLATIONS['zh'][key] || key;
+        }
+
+        function setLanguage(lang) {
+            CURRENT_LANG = lang;
+            localStorage.setItem('gameLanguage', lang);
+            document.documentElement.setAttribute('data-lang', lang);
+            updateUIText();
+        }
+
+        function toggleLanguage() {
+            const newLang = CURRENT_LANG === 'zh' ? 'en' : 'zh';
+            setLanguage(newLang);
+        }
+
+        function updateUIText() {
+            // 標題
+            const title = document.getElementById('main-title');
+            if (title) title.textContent = t('title');
+
+            // Info button
+            const infoBtn = document.getElementById('info-btn');
+            if (infoBtn) infoBtn.title = t('info');
+
+            // Language button
+            const langText = document.getElementById('lang-text');
+            if (langText) langText.textContent = t('langText');
+
+            // YouTube loader
+            const youtubeLoaderText = document.getElementById('youtube-loader-text');
+            if (youtubeLoaderText) {
+                const svg = youtubeLoaderText.querySelector('svg');
+                youtubeLoaderText.innerHTML = `${svg.outerHTML}${t('youtubeLoading')}`;
+            }
+
+            // Text input
+            const textInput = document.getElementById('text-input');
+            if (textInput) textInput.placeholder = t('textPlaceholder');
+
+            // Update all labels and buttons
+            const allSpans = document.querySelectorAll('span');
+            allSpans.forEach(span => {
+                const text = span.textContent;
+                if (text === '文字:' || text === 'Text:') span.textContent = t('textLabel');
+                if (text === '大小:' || text === 'Size:') span.textContent = t('sizeLabel');
+                if (text === '色彩:' || text === 'Color:') span.textContent = t('colorLabel');
+                if (text === '聚光燈' || text === 'Spotlight') span.textContent = t('spotlight');
+                if (text === '速度' || text === 'Speed') span.textContent = t('speed');
+                if (text === '主題' || text === 'Theme') span.textContent = t('theme');
+            });
+
+            // Button texts
+            const allButtons = document.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                if (btn.textContent.includes('加入') || btn.textContent.includes('Add')) {
+                    btn.textContent = t('addBtn');
+                }
+                if (btn.textContent.includes('隨機骰子') || btn.textContent.includes('Randomize')) {
+                    btn.innerHTML = btn.innerHTML.replace(/隨機骰子|Randomize/, t('randomize'));
+                }
+                if (btn.textContent.includes('清除格子') || btn.textContent.includes('Clear Grid')) {
+                    btn.innerHTML = btn.innerHTML.replace(/清除格子|Clear Grid/, t('clearGrid'));
+                }
+                if (btn.textContent.includes('上傳') || btn.textContent.includes('Upload')) {
+                    btn.innerHTML = btn.innerHTML.replace(/上傳|Upload/, t('upload'));
+                }
+                if (btn.textContent === '清除選取' || btn.textContent === 'Clear Selection') {
+                    btn.textContent = t('clearSelection');
+                }
+            });
+
+            // Selects
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                if (select.id === 'theme-select') {
+                    const options = select.querySelectorAll('option');
+                    if (options.length >= 3) {
+                        options[0].textContent = t('darkTheme');
+                        options[1].textContent = t('lightTheme');
+                        options[2].textContent = t('parchmentTheme');
+                    }
+                }
+            });
+
+            // Drag drop text
+            const dragDropHint = document.querySelector('.text-zinc-600.italic');
+            if (dragDropHint) dragDropHint.textContent = t('dragDropText');
+
+            // Info modal
+            const infoHeading = document.querySelector('h2.text-2xl.font-black.italic');
+            if (infoHeading) infoHeading.textContent = t('howToPlay');
+
+            // Info content
+            const infoParagraphs = document.querySelectorAll('.space-y-4 > p, .space-y-4 > strong + p');
+            const aboutH3 = document.querySelector('h3.text-lg.font-bold');
+            if (aboutH3) aboutH3.textContent = t('about');
+        }
+
+        // Initialize language on page load
+        document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+        setTimeout(updateUIText, 100);
+    </script>
+
+    <script>
         // --- 核心設定 ---
         let BPM = 174;
         let BEAT_DURATION = 60 / BPM;
@@ -1234,7 +1426,7 @@
             const color = colorInput.value;
 
             if (!text) {
-                alert('請輸入文字！');
+                alert(t('emptyText'));
                 return;
             }
 
@@ -1319,7 +1511,7 @@
             });
 
             if (trayItems.length === 0) {
-                alert('素材庫是空的！請先上傳圖片或輸入文字。');
+                alert(t('emptyTray'));
                 return;
             }
 
