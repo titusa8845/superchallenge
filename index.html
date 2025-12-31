@@ -97,7 +97,7 @@
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                     </path>
                 </svg>
-                YOUTUBE影片หมูหมากาไก่載入中
+                YOUTUBE影片Wordonbeat載入中
             </span>
         </div>
     </div>
@@ -187,6 +187,37 @@
                 class="text-zinc-400 group-hover:text-white transition-transform duration-300">
                 <polyline points="6 9 12 15 18 9" />
             </svg>
+        </div>
+
+        <!-- 文字輸入面板 -->
+        <div class="px-4 py-3 border-b border-white/10 bg-black/50">
+            <div class="flex flex-wrap gap-3 items-center">
+                <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">文字:</span>
+                <input type="text" id="text-input" placeholder="輸入文字..." maxlength="20"
+                    class="bg-zinc-800 text-white text-xs px-2 py-1.5 rounded border border-zinc-600 focus:outline-none focus:border-blue-500 focus:bg-zinc-700 transition-colors">
+                
+                <div class="flex items-center gap-2 border-l border-white/10 pl-3">
+                    <span class="text-xs text-zinc-400">大小:</span>
+                    <input type="number" id="text-size" min="12" max="72" value="24"
+                        class="bg-zinc-800 text-white text-xs px-2 py-1 rounded border border-zinc-600 focus:outline-none focus:border-blue-500 w-12 text-center transition-colors">
+                </div>
+
+                <div class="flex items-center gap-2 border-l border-white/10 pl-3">
+                    <span class="text-xs text-zinc-400">色彩:</span>
+                    <input type="color" id="text-color" value="#ffffff"
+                        class="w-8 h-8 rounded cursor-pointer border border-zinc-600 transition-colors hover:border-blue-500">
+                </div>
+
+                <button onclick="addTextToTray()"
+                    class="ml-2 px-3 py-1.5 rounded-lg bg-green-600/30 text-green-300 hover:bg-green-600 hover:text-white border border-green-500/50 transition-all flex items-center gap-2 hover:scale-105 active:scale-95 text-xs font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    加入
+                </button>
+            </div>
         </div>
 
         <div class="px-4 py-3 flex flex-wrap justify-between items-center border-b border-white/5 bg-white/5 gap-y-3">
@@ -322,8 +353,8 @@
                     <li><strong class="text-zinc-300">免責聲明：</strong>請和平遵守遊戲規則，並在適當地方進行。</li>
                     <li><strong class="text-zinc-300">開源資訊：</strong>此網頁為 HTML 公開原始碼可參考。</li>
                     <li><strong class="text-zinc-300">聲音來源：</strong>YouTube 影片 <a
-                            href="https://www.youtube.com/watch?v=XdwFDwEgn0c" target="_blank"
-                            class="text-blue-400 hover:text-blue-300 underline">หมู-หมา-กา-ไก่ </a>。</li>
+                            href="https://www.youtube.com/watch?v=JtY2bm5Y-UY" target="_blank"
+                            class="text-blue-400 hover:text-blue-300 underline">Wordonbeat</a>。</li>
                     <li><strong class="text-zinc-300">隱私聲明：</strong>圖片僅暫存於您的瀏覽器 (LocalStorage)，不會上傳至任何雲端伺服器，亦無需登入即可使用。
                     </li>
                 </ul>
@@ -652,7 +683,7 @@
 
     <script>
         // --- 核心設定 ---
-        let BPM = 174;
+        let BPM = 173;
         let BEAT_DURATION = 60 / BPM;
 
         const TOTAL_ROUNDS = 5;
@@ -661,9 +692,9 @@
         const GAME_STATE = {
             currentRound: 0,
             rounds: Array.from({ length: TOTAL_ROUNDS }, () => ({
-                images: Array(SLOTS_PER_ROUND).fill(null)
+                content: Array(SLOTS_PER_ROUND).fill(null)  // 改為通用的 content，支援 {type: 'image'|'text', ...}
             })),
-            activeTrayImage: null,
+            activeTrayItem: null,  // 改為 activeTrayItem，支援圖片或文字
             isPlaying: false,
             animationFrameId: null,
             lastBeat: -1,
@@ -673,11 +704,11 @@
 
         const RHYTHM_TIMELINE = [
             { time: 0.0, action: 'stop', round: 0 },
-            { time: 5.2, action: 'start', round: 0 },
-            { time: 10.5, action: 'start', round: 1 },
-            { time: 15.8, action: 'start', round: 2 },
-            { time: 21.0, action: 'start', round: 3 },
-            { time: 26.3, action: 'start', round: 4 },
+            { time: 5.3, action: 'start', round: 0 },
+            { time: 10.6, action: 'start', round: 1 },
+            { time: 15.9, action: 'start', round: 2 },
+            { time: 21.1, action: 'start', round: 3 },
+            { time: 26.4, action: 'start', round: 4 },
             { time: 999.0, action: 'stop' }
         ];
 
@@ -768,14 +799,27 @@
         // --- LocalStorage Functions ---
         function saveGameData() {
             try {
-                const trayImages = [];
-                document.querySelectorAll('#image-tray .tray-item img').forEach(img => {
-                    trayImages.push(img.src);
+                const trayItems = [];
+                document.querySelectorAll('#image-tray .tray-item').forEach(itemEl => {
+                    const img = itemEl.querySelector('img');
+                    if (img) {
+                        trayItems.push({ type: 'image', value: img.src });
+                    } else {
+                        const textDiv = itemEl.querySelector('div');
+                        if (textDiv && textDiv.style.color) {
+                            trayItems.push({
+                                type: 'text',
+                                value: textDiv.textContent,
+                                size: parseInt(textDiv.style.fontSize) || 24,
+                                color: textDiv.style.color
+                            });
+                        }
+                    }
                 });
 
                 const data = {
                     rounds: GAME_STATE.rounds,
-                    trayImages: trayImages,
+                    trayItems: trayItems,
                     theme: document.body.classList.contains('theme-light') ? 'light' :
                         document.body.classList.contains('theme-parchment') ? 'parchment' : 'dark',
                     spotlight: spotlightToggle ? spotlightToggle.checked : true,
@@ -800,9 +844,19 @@
                     renderGrid();
                 }
 
-                // Restore tray images
-                if (data.trayImages && data.trayImages.length > 0) {
-                    data.trayImages.forEach(src => addImageToTray(src, false));
+                // Restore tray items
+                if (data.trayItems && data.trayItems.length > 0) {
+                    data.trayItems.forEach(item => {
+                        if (item.type === 'image') {
+                            addImageToTray(item.value, false);
+                        } else if (item.type === 'text') {
+                            // 暫時設定輸入框的值，然後呼叫 addTextToTray
+                            document.getElementById('text-input').value = item.value;
+                            document.getElementById('text-size').value = item.size || 24;
+                            document.getElementById('text-color').value = item.color || '#ffffff';
+                            addTextToTray();
+                        }
+                    });
                 }
 
                 // Restore theme
@@ -887,15 +941,13 @@
         // --- UI Rendering ---
         function renderGrid() {
             gridEl.innerHTML = '';
-            const images = GAME_STATE.rounds[GAME_STATE.currentRound].images;
+            const content = GAME_STATE.rounds[GAME_STATE.currentRound].content;
 
-            images.forEach((imgSrc, index) => {
+            content.forEach((item, index) => {
                 const slot = document.createElement('div');
                 slot.id = `slot-${index}`;
-                // perspective container
                 slot.className = `grid-item perspective-1000 w-full h-full relative group cursor-pointer`;
 
-                // Flip Inner
                 const inner = document.createElement('div');
                 inner.className = 'flip-card-inner w-full h-full shadow-inner rounded-2xl';
 
@@ -903,9 +955,21 @@
                 const front = document.createElement('div');
                 front.className = 'flip-card-front bg-zinc-800/80 flex items-center justify-center border-2 border-white/5';
 
-                if (imgSrc) {
-                    front.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                       <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                if (item) {
+                    if (item.type === 'text') {
+                        // 渲染文字
+                        front.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
+                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold;">
+                                ${item.value}
+                            </div>
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
+                        `;
+                    } else {
+                        // 渲染圖片
+                        front.innerHTML = `<img src="${item.value}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                           <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                    }
                 } else {
                     front.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
                 }
@@ -926,7 +990,7 @@
 
         // Helper to update the "Back" face with the content of a specific round
         function prepareFlipContent(targetRoundIndex) {
-            const nextImages = GAME_STATE.rounds[targetRoundIndex].images;
+            const nextContent = GAME_STATE.rounds[targetRoundIndex].content;
             const slots = document.querySelectorAll('.grid-item');
 
             slots.forEach((slot, index) => {
@@ -934,13 +998,22 @@
                 if (!inner) return;
 
                 const isFlipped = slot.classList.contains('flipped');
-                // Target the hidden face
                 const targetFace = isFlipped ? inner.querySelector('.flip-card-front') : inner.querySelector('.flip-card-back');
 
-                const imgSrc = nextImages[index];
-                if (imgSrc) {
-                    targetFace.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">
-                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                const item = nextContent[index];
+                if (item) {
+                    if (item.type === 'text') {
+                        targetFace.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
+                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold;">
+                                ${item.value}
+                            </div>
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
+                        `;
+                    } else {
+                        targetFace.innerHTML = `<img src="${item.value}" class="w-full h-full object-cover">
+                                                <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                    }
                 } else {
                     targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
                 }
@@ -967,14 +1040,14 @@
         }
 
         function handleSlotClick(index) {
-            const currentImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
+            const currentItem = GAME_STATE.rounds[GAME_STATE.currentRound].content[index];
 
-            if (GAME_STATE.activeTrayImage) {
-                // If tray has selection, ALWAYS overwrite (set image)
-                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = GAME_STATE.activeTrayImage;
-            } else if (currentImg) {
-                // If NO tray selection but image exists, clear it (toggle off)
-                GAME_STATE.rounds[GAME_STATE.currentRound].images[index] = null;
+            if (GAME_STATE.activeTrayItem) {
+                // If tray has selection, ALWAYS overwrite (set content)
+                GAME_STATE.rounds[GAME_STATE.currentRound].content[index] = GAME_STATE.activeTrayItem;
+            } else if (currentItem) {
+                // If NO tray selection but item exists, clear it (toggle off)
+                GAME_STATE.rounds[GAME_STATE.currentRound].content[index] = null;
             }
             saveGameData();
 
@@ -982,14 +1055,23 @@
             const slot = document.getElementById(`slot-${index}`);
             const isFlipped = slot.classList.contains('flipped');
 
-            // We just need to update the visible face
             const inner = slot.querySelector('.flip-card-inner');
             const targetFace = isFlipped ? inner.querySelector('.flip-card-back') : inner.querySelector('.flip-card-front');
-            const newImg = GAME_STATE.rounds[GAME_STATE.currentRound].images[index];
+            const newItem = GAME_STATE.rounds[GAME_STATE.currentRound].content[index];
 
-            if (newImg) {
-                targetFace.innerHTML = `<img src="${newImg}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+            if (newItem) {
+                if (newItem.type === 'text') {
+                    targetFace.innerHTML = `
+                        <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
+                             style="color: ${newItem.color}; font-size: ${newItem.size}px; font-weight: bold;">
+                            ${newItem.value}
+                        </div>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
+                    `;
+                } else {
+                    targetFace.innerHTML = `<img src="${newItem.value}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>`;
+                }
             } else {
                 targetFace.innerHTML = `<span class="text-white/10 font-black text-6xl md:text-9xl select-none group-hover:text-white/20 transition-colors italic">#${index + 1}</span>`;
             }
@@ -1016,6 +1098,14 @@
                 handleFiles(e.dataTransfer.files);
             });
             uploadInput.addEventListener('change', (e) => { handleFiles(e.target.files); uploadInput.value = ''; });
+
+            // 文字輸入框回車支援
+            const textInput = document.getElementById('text-input');
+            if (textInput) {
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addTextToTray();
+                });
+            }
         }
 
         function handleFiles(files) {
@@ -1052,12 +1142,12 @@
             delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
             delBtn.title = '刪除圖片';
             delBtn.onclick = (e) => {
-                e.stopPropagation(); // Prevent selection
+                e.stopPropagation();
                 div.remove();
 
-                // If deleting active image, clear selection
-                if (GAME_STATE.activeTrayImage === src) {
-                    GAME_STATE.activeTrayImage = null;
+                // If deleting active item, clear selection
+                if (GAME_STATE.activeTrayItem && GAME_STATE.activeTrayItem.type === 'image' && GAME_STATE.activeTrayItem.value === src) {
+                    GAME_STATE.activeTrayItem = null;
                 }
                 saveGameData();
             };
@@ -1070,34 +1160,118 @@
                     prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
                     prev.classList.add('border-transparent');
                 }
-                if (GAME_STATE.activeTrayImage === src) {
-                    GAME_STATE.activeTrayImage = null;
+                const imageItem = { type: 'image', value: src };
+                if (GAME_STATE.activeTrayItem && GAME_STATE.activeTrayItem.type === 'image' && GAME_STATE.activeTrayItem.value === src) {
+                    GAME_STATE.activeTrayItem = null;
                 } else {
                     div.classList.remove('border-transparent');
                     div.classList.add('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
-                    GAME_STATE.activeTrayImage = src;
+                    GAME_STATE.activeTrayItem = imageItem;
                 }
             };
             trayEl.appendChild(div);
             if (shouldSave) saveGameData();
         }
 
+        function addTextToTray() {
+            const textInput = document.getElementById('text-input');
+            const sizeInput = document.getElementById('text-size');
+            const colorInput = document.getElementById('text-color');
+
+            const text = textInput.value.trim();
+            const size = parseInt(sizeInput.value) || 24;
+            const color = colorInput.value;
+
+            if (!text) {
+                alert('請輸入文字！');
+                return;
+            }
+
+            // Remove hint if present
+            const hint = trayEl.querySelector('.text-zinc-600');
+            if (hint) hint.remove();
+
+            const div = document.createElement('div');
+            div.className = 'tray-item w-28 h-24 bg-zinc-800 rounded-xl shrink-0 cursor-pointer overflow-hidden relative border-2 border-transparent hover:border-zinc-500 transition-all group flex items-center justify-center p-2';
+
+            // 文字預覽
+            const textPreview = document.createElement('div');
+            textPreview.className = 'w-full h-full flex items-center justify-center text-center break-words';
+            textPreview.style.color = color;
+            textPreview.style.fontSize = Math.min(size, 16) + 'px';
+            textPreview.style.fontWeight = 'bold';
+            textPreview.textContent = text;
+            div.appendChild(textPreview);
+
+            // Delete Button (X)
+            const delBtn = document.createElement('button');
+            delBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-md z-20 hover:scale-110 active:scale-90';
+            delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+            delBtn.title = '刪除文字';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                div.remove();
+
+                // If deleting active item, clear selection
+                if (GAME_STATE.activeTrayItem && GAME_STATE.activeTrayItem.type === 'text' && GAME_STATE.activeTrayItem.value === text) {
+                    GAME_STATE.activeTrayItem = null;
+                }
+                saveGameData();
+            };
+            div.appendChild(delBtn);
+
+            // Selection Logic
+            div.onclick = () => {
+                const prev = trayEl.querySelector('.border-blue-500');
+                if (prev) {
+                    prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
+                    prev.classList.add('border-transparent');
+                }
+                const textItem = { type: 'text', value: text, size: size, color: color };
+                if (GAME_STATE.activeTrayItem && GAME_STATE.activeTrayItem.type === 'text' && GAME_STATE.activeTrayItem.value === text) {
+                    GAME_STATE.activeTrayItem = null;
+                } else {
+                    div.classList.remove('border-transparent');
+                    div.classList.add('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
+                    GAME_STATE.activeTrayItem = textItem;
+                }
+            };
+            trayEl.appendChild(div);
+            textInput.value = '';
+            saveGameData();
+        }
+
         function randomizeAllRounds() {
-            const trayImages = [];
-            document.querySelectorAll('#image-tray .tray-item img').forEach(img => {
-                trayImages.push(img.src);
+            const trayItems = [];
+            document.querySelectorAll('#image-tray .tray-item').forEach(itemEl => {
+                const img = itemEl.querySelector('img');
+                if (img) {
+                    // 圖片
+                    trayItems.push({ type: 'image', value: img.src });
+                } else {
+                    // 文字
+                    const textDiv = itemEl.querySelector('div');
+                    if (textDiv && textDiv.style.color) {
+                        trayItems.push({
+                            type: 'text',
+                            value: textDiv.textContent,
+                            size: parseInt(textDiv.style.fontSize) || 24,
+                            color: textDiv.style.color
+                        });
+                    }
+                }
             });
 
-            if (trayImages.length === 0) {
-                alert('素材庫是空的！請先上傳圖片。');
+            if (trayItems.length === 0) {
+                alert('素材庫是空的！請先上傳圖片或輸入文字。');
                 return;
             }
 
             // Fill all rounds
             for (let r = 0; r < TOTAL_ROUNDS; r++) {
                 for (let s = 0; s < SLOTS_PER_ROUND; s++) {
-                    const randomImg = trayImages[Math.floor(Math.random() * trayImages.length)];
-                    GAME_STATE.rounds[r].images[s] = randomImg;
+                    const randomItem = trayItems[Math.floor(Math.random() * trayItems.length)];
+                    GAME_STATE.rounds[r].content[s] = randomItem;
                 }
             }
 
@@ -1113,10 +1287,10 @@
         }
 
         function clearAllGridImages() {
-            // Clear all images in all rounds
+            // Clear all content in all rounds
             for (let r = 0; r < TOTAL_ROUNDS; r++) {
                 for (let s = 0; s < SLOTS_PER_ROUND; s++) {
-                    GAME_STATE.rounds[r].images[s] = null;
+                    GAME_STATE.rounds[r].content[s] = null;
                 }
             }
 
@@ -1130,14 +1304,14 @@
                 prev.classList.remove('border-blue-500', 'shadow-[0_0_20px_rgba(59,130,246,0.6)]', 'scale-105', 'z-10');
                 prev.classList.add('border-transparent');
             }
-            GAME_STATE.activeTrayImage = null;
+            GAME_STATE.activeTrayItem = null;
         }
 
         // --- YouTube API ---
         let player;
         window.onYouTubeIframeAPIReady = function () {
             player = new YT.Player('youtube-player', {
-                height: '100%', width: '100%', videoId: 'XdwFDwEgn0c',
+                height: '100%', width: '100%', videoId: 'JtY2bm5Y-UY',
                 playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
                 events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
             });
