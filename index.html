@@ -970,7 +970,7 @@
                         // 渲染文字
                         front.innerHTML = `
                             <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
-                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold;">
+                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold; line-height: 1.2;">
                                 ${item.value}
                             </div>
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
@@ -1015,7 +1015,7 @@
                     if (item.type === 'text') {
                         targetFace.innerHTML = `
                             <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
-                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold;">
+                                 style="color: ${item.color}; font-size: ${item.size}px; font-weight: bold; line-height: 1.2;">
                                 ${item.value}
                             </div>
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
@@ -1073,7 +1073,7 @@
                 if (newItem.type === 'text') {
                     targetFace.innerHTML = `
                         <div class="w-full h-full flex items-center justify-center p-4 text-center break-words" 
-                             style="color: ${newItem.color}; font-size: ${newItem.size}px; font-weight: bold;">
+                             style="color: ${newItem.color}; font-size: ${newItem.size}px; font-weight: bold; line-height: 1.2;">
                             ${newItem.value}
                         </div>
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-white/10 transition-colors"></div>
@@ -1208,8 +1208,9 @@
             const textPreview = document.createElement('div');
             textPreview.className = 'w-full h-full flex items-center justify-center text-center break-words';
             textPreview.style.color = color;
-            textPreview.style.fontSize = Math.min(size, 16) + 'px';
+            textPreview.style.fontSize = Math.min(size, 14) + 'px';
             textPreview.style.fontWeight = 'bold';
+            textPreview.style.lineHeight = '1.2';
             textPreview.textContent = text;
             div.appendChild(textPreview);
 
